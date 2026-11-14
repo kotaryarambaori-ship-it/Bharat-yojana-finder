@@ -3,269 +3,453 @@
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#075985">
   <title>Bharat Yojana Finder</title>
   <style>
-    *{box-sizing:border-box}
-    body{margin:0;background:#f1f5f9;color:#172033;font-family:Arial,sans-serif}
-    header{background:linear-gradient(135deg,#075985,#2563eb);color:white;padding:25px 16px;text-align:center}
-    header h1{margin:0 0 8px;font-size:25px}
-    header p{margin:0;font-size:14px}
-    main{max-width:850px;margin:auto;padding:14px}
-    .card{background:white;padding:17px;border-radius:14px;margin:14px 0;box-shadow:0 3px 14px #0000000c}
-    h2{font-size:19px;margin:0 0 15px}
-    label{font-size:14px;font-weight:bold;display:block;margin:12px 0 6px}
-    input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px;background:white}
-    button{border:0;border-radius:9px;padding:12px 16px;background:#075985;color:white;font-size:15px;font-weight:bold;cursor:pointer}
-    button:disabled{opacity:.6}
-    .searchbtn{width:100%;margin-top:17px;background:#ea580c}
-    .result{border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin:12px 0;background:#fff}
-    .result h3{margin:0 0 9px;font-size:17px;color:#075985}
-    .result p{font-size:14px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
-    .source{font-size:12px;color:#64748b;overflow-wrap:anywhere}
-    a{color:#0369a1;overflow-wrap:anywhere}
-    .smallbtn{font-size:13px;padding:9px 12px;margin-top:8px}
-    .green{background:#15803d}
-    .red{background:#b91c1c}
-    .muted{color:#64748b;font-size:13px}
-    .status{padding:12px;background:#e0f2fe;border-radius:9px;margin:12px 0;font-size:14px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    footer{text-align:center;color:#64748b;padding:22px;font-size:12px}
-    @media(max-width:520px){.grid{grid-template-columns:1fr}header h1{font-size:22px}}
+    :root {
+      --blue:#075985;
+      --blue2:#0e7490;
+      --bg:#f1f5f9;
+      --card:#fff;
+      --text:#172033;
+      --muted:#64748b;
+      --border:#dbe3ed;
+      --green:#15803d;
+      --orange:#c2410c;
+      --red:#b91c1c;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+      font-family:Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    header {
+      color:white;
+      padding:25px 16px;
+      text-align:center;
+      background:linear-gradient(135deg,var(--blue),var(--blue2));
+    }
+    header h1 { margin:0 0 7px; font-size:25px; }
+    header p { margin:0; font-size:14px; opacity:.95; }
+    main { width:min(850px,100%); margin:auto; padding:15px; }
+    .card {
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:15px;
+      padding:16px;
+      margin:0 0 15px;
+      box-shadow:0 3px 12px #0f172a0b;
+    }
+    h2 { font-size:19px; margin:0 0 12px; }
+    h3 { font-size:16px; margin:0 0 7px; }
+    .grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:11px;
+    }
+    label {
+      display:block;
+      font-weight:700;
+      font-size:13px;
+      margin:0 0 5px;
+    }
+    input,select,textarea {
+      width:100%;
+      padding:12px;
+      border:1px solid #cbd5e1;
+      border-radius:9px;
+      font-size:15px;
+      background:white;
+      color:#172033;
+      outline:none;
+    }
+    input:focus,select:focus,textarea:focus {
+      border-color:#0284c7;
+      box-shadow:0 0 0 2px #0284c722;
+    }
+    .field { margin-bottom:11px; }
+    button {
+      border:0;
+      border-radius:9px;
+      padding:12px 16px;
+      background:var(--blue);
+      color:white;
+      font-weight:700;
+      font-size:15px;
+      cursor:pointer;
+    }
+    button:disabled { opacity:.6; cursor:wait; }
+    .secondary { background:#475569; }
+    .danger { background:#b91c1c; padding:8px 11px; font-size:13px; }
+    .search-button { width:100%; margin-top:4px; }
+    .muted { color:var(--muted); font-size:13px; }
+    .notice {
+      border-radius:10px;
+      padding:12px;
+      margin:10px 0;
+      font-size:14px;
+      background:#eff6ff;
+      border:1px solid #bfdbfe;
+      color:#1e40af;
+    }
+    .warning {
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      color:#9a3412;
+    }
+    .success {
+      background:#f0fdf4;
+      border:1px solid #bbf7d0;
+      color:#166534;
+    }
+    .error {
+      background:#fef2f2;
+      border:1px solid #fecaca;
+      color:#991b1b;
+    }
+    .result {
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:13px;
+      margin:10px 0;
+      background:#fff;
+    }
+    .result p { margin:7px 0; font-size:14px; }
+    .result a {
+      color:#0369a1;
+      font-weight:700;
+      overflow-wrap:anywhere;
+    }
+    .tag {
+      display:inline-block;
+      padding:3px 8px;
+      border-radius:20px;
+      font-size:11px;
+      font-weight:700;
+      margin-bottom:7px;
+      background:#dcfce7;
+      color:#166534;
+    }
+    .tag.regional { background:#ffedd5; color:#9a3412; }
+    .row {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .hidden { display:none; }
+    footer {
+      text-align:center;
+      color:var(--muted);
+      padding:15px;
+      font-size:12px;
+    }
+    @media(max-width:520px) {
+      .grid { grid-template-columns:1fr; gap:0; }
+      header h1 { font-size:22px; }
+      main { padding:10px; }
+      .card { padding:13px; }
+    }
   </style>
 </head>
 <body>
-
 <header>
-  <h1>🇮🇳 Bharat Yojana Finder</h1>
-  <p>अपने क्षेत्र की सरकारी योजनाएँ और सुविधाएँ खोजें</p>
+  <h1>🇮🇳 भारत योजना खोजक</h1>
+  <p>अपने गाँव, तहसील, जिला और राज्य के अनुसार सरकारी योजनाएँ खोजें</p>
 </header>
 
 <main>
-
   <section class="card">
-    <h2>📍 अपने क्षेत्र की जानकारी भरें</h2>
-
-    <label>राज्य</label>
-    <input id="state" placeholder="जैसे उत्तर प्रदेश">
-
-    <label>जिला</label>
-    <input id="district" placeholder="जैसे प्रयागराज">
-
-    <label>तहसील</label>
-    <input id="tehsil" placeholder="जैसे बारा">
-
-    <label>गाँव</label>
-    <input id="village" placeholder="जैसे XYZ या अपने गाँव का नाम">
-
-    <label>क्या खोजें?</label>
-    <input id="keyword" placeholder="जैसे किसान सम्मान निधि, छात्रवृत्ति, पेंशन">
-
-    <label>योजना की श्रेणी</label>
-    <select id="category">
-      <option value="all">सभी योजनाएँ</option>
-      <option value="farmer schemes">किसान योजनाएँ</option>
-      <option value="scholarship">छात्रवृत्ति</option>
-      <option value="employment jobs">रोजगार और नौकरी</option>
-      <option value="pension">पेंशन</option>
-      <option value="housing">आवास योजना</option>
-      <option value="health">स्वास्थ्य योजना</option>
-      <option value="women welfare">महिला कल्याण</option>
-      <option value="ration">राशन योजना</option>
-    </select>
-
-    <label>जानकारी की समय सीमा</label>
-    <select id="dateRange">
-      <option value="all">सभी उपलब्ध जानकारी</option>
-      <option value="today">आज की जानकारी</option>
-      <option value="week">पिछले 7 दिन</option>
-      <option value="month">पिछले 30 दिन</option>
-      <option value="year">पिछले 1 साल</option>
-    </select>
-
-    <button class="searchbtn" id="searchBtn" onclick="searchSchemes()">
-      🔎 योजनाएँ खोजें
-    </button>
-
-    <div id="status"></div>
-  </section>
-
-  <section class="card">
-    <h2>🔍 इंटरनेट से मिले परिणाम</h2>
-    <div id="results">
-      <p class="muted">अपना क्षेत्र भरकर योजनाएँ खोजें।</p>
+    <h2>📍 अपने गाँव की जानकारी भरें</h2>
+    <div class="notice">
+      सही परिणाम के लिए राज्य, जिला, तहसील और गाँव का नाम सही-सही भरें।
+      ऐप दूसरे गाँव के परिणाम को आपके गाँव का पक्का परिणाम नहीं बताएगा।
     </div>
+
+    <form id="searchForm">
+      <div class="grid">
+        <div class="field">
+          <label for="state">राज्य *</label>
+          <input id="state" required placeholder="जैसे उत्तर प्रदेश">
+        </div>
+        <div class="field">
+          <label for="district">जिला *</label>
+          <input id="district" required placeholder="जैसे प्रयागराज">
+        </div>
+        <div class="field">
+          <label for="tehsil">तहसील *</label>
+          <input id="tehsil" required placeholder="जैसे बारा">
+        </div>
+        <div class="field">
+          <label for="village">गाँव *</label>
+          <input id="village" required placeholder="जैसे पंडुवा">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="keyword">योजना का नाम या खोज शब्द *</label>
+        <input id="keyword" required placeholder="जैसे आवास योजना, किसान सम्मान निधि">
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="category">योजना की श्रेणी</label>
+          <select id="category">
+            <option value="">सभी श्रेणियाँ</option>
+            <option value="किसान योजना">किसान योजना</option>
+            <option value="आवास योजना">आवास योजना</option>
+            <option value="पेंशन योजना">पेंशन योजना</option>
+            <option value="छात्रवृत्ति">छात्रवृत्ति</option>
+            <option value="रोजगार योजना">रोजगार</option>
+            <option value="महिला कल्याण">महिला कल्याण</option>
+            <option value="राशन योजना">राशन</option>
+            <option value="स्वास्थ्य योजना">स्वास्थ्य</option>
+            <option value="पशुपालन और डेयरी">पशुपालन और डेयरी</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="dateRange">जानकारी की समय सीमा</label>
+          <select id="dateRange">
+            <option value="all">सभी समय</option>
+            <option value="today">आज</option>
+            <option value="week">पिछले 7 दिन</option>
+            <option value="month">पिछले 30 दिन</option>
+            <option value="year">पिछले 12 महीने</option>
+          </select>
+        </div>
+      </div>
+      <button class="search-button" id="searchBtn" type="submit">🔎 योजनाएँ खोजें</button>
+    </form>
+    <div id="searchMessage" aria-live="polite"></div>
+  </section>
+
+  <section id="exactSection" class="card hidden">
+    <h2>✅ गाँव से मिलान वाले परिणाम</h2>
+    <p class="muted">इन परिणामों में राज्य, जिला, तहसील और गाँव—चारों नाम स्रोत में मिले हैं। फिर भी योजना की पात्रता आधिकारिक स्रोत पर जाँचें।</p>
+    <div id="exactResults"></div>
+  </section>
+
+  <section id="regionalSection" class="card hidden">
+    <h2>⚠️ जिला / राज्य के परिणाम</h2>
+    <div class="notice warning">
+      इन परिणामों में गाँव का नाम चारों स्थानों के साथ सत्यापित नहीं हुआ है।
+      इन्हें पंडुवा गाँव की पक्की जानकारी न मानें। योजना की स्थानीय लागू स्थिति संबंधित सरकारी कार्यालय से जाँचें।
+    </div>
+    <div id="regionalResults"></div>
+  </section>
+
+  <section id="noResults" class="card hidden">
+    <h2>कोई मिलान वाला परिणाम नहीं मिला</h2>
+    <p>इस खोज में चारों स्थानों से मेल खाने वाला रिकॉर्ड नहीं मिला। गाँव का गलत डेटा दिखाने के बजाय हमने परिणाम रोक दिए हैं।</p>
+    <p class="muted">गाँव या योजना के नाम की वर्तनी जाँचें। सरकारी वेबसाइट पर रिकॉर्ड उपलब्ध न होने पर इंटरनेट खोज से भी परिणाम नहीं मिल सकता।</p>
   </section>
 
   <section class="card">
-    <h2>⭐ सुरक्षित योजनाएँ</h2>
-    <button class="smallbtn green" onclick="loadSaved()">Saved Schemes देखें</button>
-    <div id="saved"></div>
+    <div class="row">
+      <h2>📚 सेव की गई योजनाएँ</h2>
+      <button type="button" class="secondary" id="loadSavedBtn">रिफ्रेश</button>
+    </div>
+    <div id="savedResults" class="muted">लोड हो रहा है...</div>
   </section>
 
   <section class="card">
-    <h2>🔐 Admin Panel</h2>
-    <p class="muted">योजना सेव करने या हटाने के लिए Admin Key डालें।</p>
+    <h2>🔐 एडमिन पैनल</h2>
+    <p class="muted">यहाँ से अपनी जरूरी योजना का रिकॉर्ड डेटाबेस में सेव कर सकते हैं।</p>
 
-    <label>Admin Key</label>
-    <input id="adminKey" type="password" placeholder="अपना Admin Password">
-
-    <label>योजना का नाम</label>
-    <input id="saveTitle" placeholder="योजना का नाम">
-
-    <label>योजना की जानकारी</label>
-    <textarea id="saveDescription" rows="4" placeholder="योजना का विवरण"></textarea>
-
-    <label>स्रोत लिंक</label>
-    <input id="saveUrl" placeholder="https://...">
-
-    <button class="smallbtn green" onclick="saveScheme()">योजना सेव करें</button>
-    <div id="adminStatus"></div>
+    <div class="field">
+      <label for="adminKey">Admin Key</label>
+      <input id="adminKey" type="password" autocomplete="off" placeholder="अपनी Admin Key डालें">
+    </div>
+    <div class="field">
+      <label for="saveTitle">योजना का नाम</label>
+      <input id="saveTitle" placeholder="योजना का नाम">
+    </div>
+    <div class="field">
+      <label for="saveDescription">जानकारी</label>
+      <textarea id="saveDescription" rows="3" placeholder="योजना का विवरण"></textarea>
+    </div>
+    <div class="field">
+      <label for="saveUrl">सरकारी स्रोत लिंक</label>
+      <input id="saveUrl" type="url" placeholder="https://...">
+    </div>
+    <div class="grid">
+      <div class="field">
+        <label for="saveState">राज्य</label>
+        <input id="saveState" placeholder="राज्य">
+      </div>
+      <div class="field">
+        <label for="saveCategory">श्रेणी</label>
+        <input id="saveCategory" placeholder="जैसे आवास">
+      </div>
+    </div>
+    <div class="field">
+      <label for="saveDate">प्रकाशित तारीख (यदि मालूम हो)</label>
+      <input id="saveDate" placeholder="जैसे 2026-11-14">
+    </div>
+    <button type="button" id="saveBtn">योजना सेव करें</button>
+    <div id="adminMessage" aria-live="polite"></div>
   </section>
-
 </main>
 
 <footer>
-  यह ऐप इंटरनेट पर उपलब्ध जानकारी खोजता है। आवेदन से पहले संबंधित सरकारी वेबसाइट पर पात्रता और नियम जरूर जाँचें।
+  Bharat Yojana Finder · सरकारी जानकारी के लिए हमेशा संबंधित आधिकारिक वेबसाइट की पुष्टि करें।
 </footer>
 
 <script>
-  const $ = id => document.getElementById(id);
+  const $ = (id) => document.getElementById(id);
 
-  let latestLocation = {};
-
-  function escapeHTML(value) {
-    return String(value ?? "").replace(/[&<>"']/g, char => ({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#039;"
-    })[char]);
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (ch) => ({
+      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
+    }[ch]));
   }
 
-  function safeLink(value) {
-    try {
-      const url = new URL(value);
-      if (url.protocol === "https:" || url.protocol === "http:") {
-        return url.href;
-      }
-    } catch {}
-    return "";
+  function showMessage(id, message, type = "notice") {
+    $(id).innerHTML = `<div class="notice ${type}">${escapeHtml(message)}</div>`;
   }
 
-  async function searchSchemes() {
-    const state = $("state").value.trim();
-    const district = $("district").value.trim();
-    const tehsil = $("tehsil").value.trim();
-    const village = $("village").value.trim();
-    const q = $("keyword").value.trim();
+  function renderResults(targetId, results, regional = false) {
+    const target = $(targetId);
 
-    if (!state && !district && !tehsil && !village && !q) {
-      $("status").innerHTML =
-        '<div class="status">कृपया कोई स्थान या खोज का नाम भरें।</div>';
+    if (!Array.isArray(results) || results.length === 0) {
+      target.innerHTML = "<p class='muted'>कोई परिणाम नहीं मिला।</p>";
       return;
     }
 
-    latestLocation = {state, district, tehsil, village};
+    target.innerHTML = results.map((item) => {
+      const title = escapeHtml(item.title || "योजना की जानकारी");
+      const description = escapeHtml(item.description || "स्रोत वेबसाइट पर जानकारी देखें।");
+      const url = escapeHtml(item.url || "#");
+      const date = item.date ? `<p class="muted">तारीख: ${escapeHtml(item.date)}</p>` : "";
+      const tag = regional
+        ? `<span class="tag regional">गाँव की पुष्टि नहीं</span>`
+        : `<span class="tag">चारों स्थानों का मिलान</span>`;
 
-    const params = new URLSearchParams({
-      state,
-      district,
-      tehsil,
-      village,
-      q,
+      return `
+        <article class="result">
+          ${tag}
+          <h3>${title}</h3>
+          <p>${description}</p>
+          ${date}
+          <a href="${url}" target="_blank" rel="noopener noreferrer">मूल वेबसाइट / स्रोत खोलें ↗</a>
+        </article>
+      `;
+    }).join("");
+  }
+
+  async function searchSchemes(event) {
+    event.preventDefault();
+
+    const button = $("searchBtn");
+    button.disabled = true;
+    button.textContent = "खोज जारी है...";
+    $("searchMessage").innerHTML = "";
+    $("exactSection").classList.add("hidden");
+    $("regionalSection").classList.add("hidden");
+    $("noResults").classList.add("hidden");
+
+    const body = {
+      state: $("state").value.trim(),
+      district: $("district").value.trim(),
+      tehsil: $("tehsil").value.trim(),
+      village: $("village").value.trim(),
+      keyword: $("keyword").value.trim(),
       category: $("category").value,
       dateRange: $("dateRange").value
-    });
-
-    $("searchBtn").disabled = true;
-    $("searchBtn").textContent = "खोज जारी है...";
-    $("status").innerHTML =
-      '<div class="status">इंटरनेट पर जानकारी खोजी जा रही है। कृपया प्रतीक्षा करें...</div>';
-    $("results").innerHTML = "";
+    };
 
     try {
-      const response = await fetch("/api/search?" + params.toString());
+      const response = await fetch("/api/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || "Search failed");
+      if (!response.ok || !data.ok) {
+        throw new Error(data.message || "खोज पूरी नहीं हो सकी।");
       }
 
-      if (!data.results || data.results.length === 0) {
-        $("results").innerHTML =
-          '<div class="status">इस खोज के लिए कोई परिणाम नहीं मिला। दूसरे शब्दों से खोजें।</div>';
-        $("status").innerHTML = "";
-        return;
+      showMessage("searchMessage", data.message || "खोज पूरी हुई।", "success");
+
+      const exact = data.exactResults || [];
+      const regional = data.regionalResults || [];
+
+      if (exact.length) {
+        $("exactSection").classList.remove("hidden");
+        renderResults("exactResults", exact, false);
       }
 
-      $("status").innerHTML =
-        '<div class="status">कुल ' + data.count + ' परिणाम मिले। ये इंटरनेट से मिले परिणाम हैं, सरकारी सत्यापन नहीं।</div>';
+      if (regional.length) {
+        $("regionalSection").classList.remove("hidden");
+        renderResults("regionalResults", regional, true);
+      }
 
-      $("results").innerHTML = data.results.map((item, index) => {
-        const title = escapeHTML(item.title);
-        const description = escapeHTML(item.description);
-        const source = escapeHTML(item.source || "");
-        const date = escapeHTML(item.date || "तारीख उपलब्ध नहीं");
-        const link = safeLink(item.url);
-
-        return `
-          <article class="result">
-            <h3>${title}</h3>
-            <p>${description}</p>
-            <div class="source">स्रोत: ${source} | तारीख: ${date}</div>
-            ${link ? `<p><a href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer">मूल वेबसाइट खोलें ↗</a></p>` : ""}
-            <button class="smallbtn green"
-              onclick="prepareSave(${index})">Admin के लिए सेव करें</button>
-          </article>
-        `;
-      }).join("");
-
-      window.currentResults = data.results;
-
+      if (!exact.length && !regional.length) {
+        $("noResults").classList.remove("hidden");
+      }
     } catch (error) {
-      $("status").innerHTML =
-        '<div class="status">त्रुटि: ' + escapeHTML(error.message) + '</div>';
+      showMessage("searchMessage", error.message || "इंटरनेट या सर्वर में समस्या हुई।", "error");
     } finally {
-      $("searchBtn").disabled = false;
-      $("searchBtn").textContent = "🔎 योजनाएँ खोजें";
+      button.disabled = false;
+      button.textContent = "🔎 योजनाएँ खोजें";
     }
   }
 
-  function prepareSave(index) {
-    const item = window.currentResults?.[index];
-    if (!item) return;
+  async function loadSaved() {
+    $("savedResults").textContent = "लोड हो रहा है...";
 
-    $("saveTitle").value = item.title || "";
-    $("saveDescription").value = item.description || "";
-    $("saveUrl").value = item.url || "";
+    try {
+      const response = await fetch("/api/saved");
+      const data = await response.json();
 
-    $("adminStatus").innerHTML =
-      '<div class="status">योजना भर दी गई है। अब Admin Key डालकर सेव करें।</div>';
+      if (!response.ok || !data.ok) throw new Error(data.message || "रिकॉर्ड नहीं मिले।");
 
-    $("adminKey").scrollIntoView({behavior:"smooth", block:"center"});
+      const rows = data.results || [];
+
+      if (!rows.length) {
+        $("savedResults").innerHTML = "<p>अभी कोई योजना सेव नहीं है।</p>";
+        return;
+      }
+
+      $("savedResults").innerHTML = rows.map((item) => `
+        <article class="result">
+          <h3>${escapeHtml(item.title)}</h3>
+          <p>${escapeHtml(item.description || "")}</p>
+          <p class="muted">${escapeHtml(item.state || "")} · ${escapeHtml(item.category || "")}</p>
+          <a href="${escapeHtml(item.source_url)}" target="_blank" rel="noopener noreferrer">स्रोत खोलें ↗</a>
+          <div class="row" style="margin-top:9px">
+            <span class="muted">रिकॉर्ड #${Number(item.id)}</span>
+            <button type="button" class="danger" data-delete-id="${Number(item.id)}">डिलीट</button>
+          </div>
+        </article>
+      `).join("");
+    } catch (error) {
+      $("savedResults").textContent = error.message;
+    }
   }
 
   async function saveScheme() {
     const key = $("adminKey").value.trim();
-    const title = $("saveTitle").value.trim();
 
-    if (!key || !title) {
-      $("adminStatus").textContent = "Admin Key और योजना का नाम भरें।";
+    if (!key) {
+      showMessage("adminMessage", "पहले Admin Key भरें।", "error");
       return;
     }
 
     const body = {
-      title,
-      description: $("saveDescription").value,
-      source_url: $("saveUrl").value,
-      state: latestLocation.state || $("state").value,
-      district: latestLocation.district || $("district").value,
-      tehsil: latestLocation.tehsil || $("tehsil").value,
-      village: latestLocation.village || $("village").value,
-      category: $("category").value
+      title: $("saveTitle").value.trim(),
+      description: $("saveDescription").value.trim(),
+      source_url: $("saveUrl").value.trim(),
+      state: $("saveState").value.trim(),
+      category: $("saveCategory").value.trim(),
+      published_date: $("saveDate").value.trim()
     };
 
     try {
@@ -279,54 +463,16 @@
       });
 
       const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.message || "सेव नहीं हुआ।");
 
-      if (!response.ok) throw new Error(data.error || "Save failed");
-
-      $("adminStatus").innerHTML =
-        '<div class="status">योजना सफलतापूर्वक सेव हो गई।</div>';
-
-      loadSaved();
-
+      showMessage("adminMessage", "योजना सफलतापूर्वक सेव हो गई।", "success");
+      $("saveTitle").value = "";
+      $("saveDescription").value = "";
+      $("saveUrl").value = "";
+      $("saveDate").value = "";
+      await loadSaved();
     } catch (error) {
-      $("adminStatus").innerHTML =
-        '<div class="status">सेव नहीं हुई: ' + escapeHTML(error.message) + '</div>';
-    }
-  }
-
-  async function loadSaved() {
-    $("saved").innerHTML = "लोड हो रहा है...";
-
-    try {
-      const response = await fetch("/api/saved");
-      const data = await response.json();
-
-      if (!response.ok) throw new Error("Load failed");
-
-      const records = data.results || [];
-
-      if (!records.length) {
-        $("saved").innerHTML = '<p class="muted">अभी कोई रिकॉर्ड सेव नहीं है।</p>';
-        return;
-      }
-
-      $("saved").innerHTML = records.map(item => {
-        const link = safeLink(item.source_url);
-
-        return `
-          <div class="result">
-            <h3>${escapeHTML(item.title)}</h3>
-            <p>${escapeHTML(item.description || "")}</p>
-            <div class="source">
-              ${escapeHTML([item.state,item.district,item.tehsil,item.village].filter(Boolean).join(" / "))}
-            </div>
-            ${link ? `<p><a href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer">स्रोत खोलें ↗</a></p>` : ""}
-            <button class="smallbtn red" onclick="deleteScheme(${Number(item.id)})">Delete</button>
-          </div>
-        `;
-      }).join("");
-
-    } catch (error) {
-      $("saved").textContent = "Saved records लोड नहीं हुए।";
+      showMessage("adminMessage", error.message, "error");
     }
   }
 
@@ -334,33 +480,39 @@
     const key = $("adminKey").value.trim();
 
     if (!key) {
-      alert("पहले Admin Key डालें।");
+      showMessage("adminMessage", "डिलीट करने के लिए Admin Key भरें।", "error");
       return;
     }
 
-    if (!confirm("क्या आप यह रिकॉर्ड हटाना चाहते हैं?")) return;
+    if (!confirm("क्या आप यह रिकॉर्ड डिलीट करना चाहते हैं?")) return;
 
     try {
-      const response = await fetch("/api/admin/schemes/" + id, {
+      const response = await fetch(`/api/admin/schemes/${encodeURIComponent(id)}`, {
         method: "DELETE",
-        headers: {"x-admin-key": key}
+        headers: { "x-admin-key": key }
       });
 
       const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.message || "डिलीट नहीं हुआ।");
 
-      if (!response.ok) throw new Error(data.error || "Delete failed");
-
-      alert("रिकॉर्ड हटा दिया गया।");
-      loadSaved();
-
+      showMessage("adminMessage", "रिकॉर्ड डिलीट हो गया।", "success");
+      await loadSaved();
     } catch (error) {
-      alert(error.message);
+      showMessage("adminMessage", error.message, "error");
     }
   }
 
+  $("searchForm").addEventListener("submit", searchSchemes);
+  $("loadSavedBtn").addEventListener("click", loadSaved);
+  $("saveBtn").addEventListener("click", saveScheme);
+
+  $("savedResults").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-delete-id]");
+    if (button) deleteScheme(button.dataset.deleteId);
+  });
+
   loadSaved();
 </script>
-
 </body>
       </html>
-      
+  
