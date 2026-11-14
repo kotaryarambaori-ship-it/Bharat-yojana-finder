@@ -17,10 +17,11 @@ if (!process.env.DATABASE_URL) {
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL.includes("localhost") ||
-       process.env.DATABASE_URL.includes("127.0.0.1")
-    ? false
-    : { rejectUnauthorized: false }
+  ssl:
+    process.env.DATABASE_URL.includes("localhost") ||
+    process.env.DATABASE_URL.includes("127.0.0.1")
+      ? false
+      : { rejectUnauthorized: false }
 });
 
 async function initDatabase() {
@@ -60,22 +61,81 @@ function validUrl(value) {
   }
 }
 
-function makeSearchQuery({ q, state, district, tehsil, village, category }) {
-  const parts = [];
+// Text ko matching ke liye normalize karna
+function normalize(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .toLocaleLowerCase("hi")
+    .replace(/[\s\-_.,।/\\]+/g, "")
+    .replace(/[^\p{L}\p{N}]/gu, "");
+}
 
-  if (q) parts.push(q);
-  else parts.push("government schemes benefits application");
+// Kuch common Hindi-English village spellings
+function villageAliases(village) {
+  const n = normalize(village);
 
-  if (village) parts.push("village " + village);
-  if (tehsil) parts.push("tehsil " + tehsil);
-  if (district) parts.push("district " + district);
-  if (state) parts.push("state " + state);
-
-  if (category && category !== "all") {
-    parts.push(category);
+  if (["पंडुवा", "पंडुआ", "पंडुवा"].includes(n)) {
+    return ["पंडुवा", "पंडुआ", "Panduwa", "Pandua"];
   }
 
-  parts.push("India government scheme official information");
+  return [village];
+}
+
+// Result ke title, description aur URL mein location match
+function matchesLocation(item, location) {
+  const text = normalize([
+    item.name,
+    item.text,
+    item.snippet,
+    item.url
+  ].join(" "));
+
+  if (location.village) {
+    const aliases = villageAliases(location.village);
+    const villageMatch = aliases.some(alias => {
+      const name = normalize(alias);
+      return name.length >= 2 && text.includes(name);
+    });
+
+    if (!villageMatch) return false;
+  }
+
+  if (location.district) {
+    const district = normalize(location.district);
+    if (district.length >= 3 && !text.includes(district)) {
+      return false;
+    }
+  }
+
+  if (location.tehsil) {
+    const tehsil = normalize(location.tehsil);
+    if (tehsil.length >= 3 && !text.includes(tehsil)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function makeSearchQuery(filters) {
+  const parts = [
+    "Indian government schemes official information"
+  ];
+
+  if (filters.q) parts.push(filters.q);
+  if (filters.category && filters.category !== "all") {
+    parts.push(filters.category);
+  }
+
+  if (filters.state) parts.push(`state "${filters.state}"`);
+  if (filters.district) parts.push(`district "${filters.district}"`);
+  if (filters.tehsil) parts.push(`tehsil "${filters.tehsil}"`);
+
+  if (filters.village) {
+    const aliases = villageAliases(filters.village);
+    parts.push(`village "${aliases.join('" OR "')}"`);
+    parts.push("exact village location");
+  }
 
   return parts.join(" ");
 }
@@ -88,6 +148,7 @@ function getFreshness(range) {
     year: "oneYear",
     all: "noLimit"
   };
+
   return map[range] || "noLimit";
 }
 
@@ -113,7 +174,7 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
-// Live internet search
+// Location-based live search
 app.get("/api/search", async (req, res) => {
   try {
     if (!process.env.LANGSEARCH_API_KEY) {
@@ -140,7 +201,7 @@ app.get("/api/search", async (req, res) => {
       !filters.village
     ) {
       return res.status(400).json({
-        error: "Search ke liye koi keyword ya location bharein"
+        error: "Search ke liye location ya keyword bharein"
       });
     }
 
@@ -156,7 +217,7 @@ app.get("/api/search", async (req, res) => {
         },
         body: JSON.stringify({
           query: searchQuery,
-          count: 10,
+          count: 20,
           freshness: getFreshness(filters.dateRange),
           contents: {
             text: { max_characters: 2500 }
@@ -168,7 +229,7 @@ app.get("/api/search", async (req, res) => {
 
     if (!response.ok) {
       const detail = await response.text();
-      console.error("LangSearch HTTP error:", response.status, detail);
+      console.error("LangSearch error:", response.status, detail);
 
       return res.status(502).json({
         error: "Online search service error",
@@ -182,7 +243,6 @@ app.get("/api/search", async (req, res) => {
       payload.code !== undefined &&
       String(payload.code) !== "200"
     ) {
-      console.error("LangSearch API error:", payload.message);
       return res.status(502).json({
         error: payload.message || "Search API failed"
       });
@@ -190,21 +250,29 @@ app.get("/api/search", async (req, res) => {
 
     const pages = payload.data?.webPages?.value || [];
 
-    const results = pages
-      .filter(item => item.url && validUrl(item.url))
-      .map(item => ({
-        title: item.name || "सरकारी योजना",
-        url: item.url,
-        description: item.text || item.snippet || "अधिक जानकारी के लिए स्रोत खोलें।",
-        date: item.datePublished || "",
-        source: (() => {
-          try {
-            return new URL(item.url).hostname;
-          } catch {
-            return "";
-          }
-        })()
-      }));
+    const validResults = pages.filter(item =>
+      item.url && validUrl(item.url)
+    );
+
+    // Strict village/district/tehsil matching
+    const matchedResults = validResults.filter(item =>
+      matchesLocation(item, filters)
+    );
+
+    const results = matchedResults.map(item => ({
+      title: item.name || "सरकारी योजना",
+      url: item.url,
+      description:
+        item.text || item.snippet || "अधिक जानकारी के लिए स्रोत खोलें।",
+      date: item.datePublished || "",
+      source: (() => {
+        try {
+          return new URL(item.url).hostname;
+        } catch {
+          return "";
+        }
+      })()
+    }));
 
     res.json({
       ok: true,
@@ -215,7 +283,13 @@ app.get("/api/search", async (req, res) => {
         tehsil: filters.tehsil,
         village: filters.village
       },
+      totalFound: validResults.length,
+      matchedCount: results.length,
       count: results.length,
+      strictLocationMatch: true,
+      message: results.length
+        ? "Location matching results"
+        : "Is location ke naam se matching information nahi mili.",
       results
     });
 
@@ -236,13 +310,16 @@ app.get("/api/saved", async (req, res) => {
     const result = await pool.query(
       "SELECT * FROM saved_schemes ORDER BY created_at DESC LIMIT 100"
     );
+
     res.json({ ok: true, results: result.rows });
   } catch (error) {
-    res.status(500).json({ error: "Saved schemes load nahi hui" });
+    res.status(500).json({
+      error: "Saved schemes load nahi hui"
+    });
   }
 });
 
-// Admin: save scheme
+// Admin save
 app.post("/api/admin/schemes", async (req, res) => {
   try {
     const adminKey = process.env.ADMIN_KEY;
@@ -256,12 +333,18 @@ app.post("/api/admin/schemes", async (req, res) => {
     const sourceUrl = clean(req.body.source_url, 1000);
 
     if (!title) {
-      return res.status(400).json({ error: "Scheme title zaroori hai" });
+      return res.status(400).json({
+        error: "Scheme title zaroori hai"
+      });
     }
 
     if (sourceUrl && !validUrl(sourceUrl)) {
-      return res.status(400).json({ error: "Source URL sahi nahi hai" });
+      return res.status(400).json({
+        error: "Source URL sahi nahi hai"
+      });
     }
+
+    const publishedDate = req.body.published_date || null;
 
     const result = await pool.query(
       `INSERT INTO saved_schemes
@@ -275,33 +358,44 @@ app.post("/api/admin/schemes", async (req, res) => {
         sourceUrl,
         clean(req.body.state, 100),
         clean(req.body.category, 100),
-        req.body.published_date || null,
+        publishedDate,
         clean(req.body.district, 100),
         clean(req.body.tehsil, 100),
         clean(req.body.village, 100)
       ]
     );
 
-    res.json({ ok: true, saved: result.rows[0] });
+    res.json({
+      ok: true,
+      saved: result.rows[0]
+    });
 
   } catch (error) {
     console.error("Save error:", error);
-    res.status(500).json({ error: "Scheme save nahi hui" });
+
+    res.status(500).json({
+      error: "Scheme save nahi hui"
+    });
   }
 });
 
-// Admin: delete saved scheme
+// Admin delete
 app.delete("/api/admin/schemes/:id", async (req, res) => {
   try {
     const adminKey = process.env.ADMIN_KEY;
 
     if (!adminKey || req.headers["x-admin-key"] !== adminKey) {
-      return res.status(401).json({ error: "Invalid Admin Key" });
+      return res.status(401).json({
+        error: "Invalid Admin Key"
+      });
     }
 
     const id = Number(req.params.id);
+
     if (!Number.isInteger(id) || id < 1) {
-      return res.status(400).json({ error: "Invalid ID" });
+      return res.status(400).json({
+        error: "Invalid ID"
+      });
     }
 
     const result = await pool.query(
@@ -310,13 +404,20 @@ app.delete("/api/admin/schemes/:id", async (req, res) => {
     );
 
     if (!result.rowCount) {
-      return res.status(404).json({ error: "Record nahi mila" });
+      return res.status(404).json({
+        error: "Record nahi mila"
+      });
     }
 
-    res.json({ ok: true, deleted: id });
+    res.json({
+      ok: true,
+      deleted: id
+    });
 
   } catch (error) {
-    res.status(500).json({ error: "Delete nahi hua" });
+    res.status(500).json({
+      error: "Delete nahi hua"
+    });
   }
 });
 
