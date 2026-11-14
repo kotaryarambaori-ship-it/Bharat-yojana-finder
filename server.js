@@ -14,24 +14,22 @@ const ADMIN_KEY = process.env.ADMIN_KEY;
 const LANGSEARCH_API_KEY = process.env.LANGSEARCH_API_KEY;
 
 if (!DATABASE_URL) {
-  console.error("DATABASE_URL is missing");
+  console.error("DATABASE_URL missing");
   process.exit(1);
 }
 
-const isLocalDatabase =
+const localDB =
   DATABASE_URL.includes("localhost") ||
   DATABASE_URL.includes("127.0.0.1");
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
-  ssl: isLocalDatabase ? false : { rejectUnauthorized: false },
+  ssl: localDB ? false : { rejectUnauthorized: false },
   connectionTimeoutMillis: 15000,
   idleTimeoutMillis: 30000
 });
 
-pool.on("error", (err) => {
-  console.error("Database pool error:", err.message);
-});
+pool.on("error", err => console.error("DB error:", err.message));
 
 function clean(value, max = 200) {
   return String(value || "").trim().slice(0, max);
@@ -39,45 +37,47 @@ function clean(value, max = 200) {
 
 function normalize(value) {
   return String(value || "")
-    .normalize("NFKD")
+    .normalize("NFKC")
     .toLowerCase()
-    .replace(/[़्]/g, "")
     .replace(/[^\p{L}\p{N}]+/gu, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-function aliasesFor(value, type) {
+function aliases(value, type) {
   const n = normalize(value);
-  const aliases = [n];
+  const result = [n];
 
   if (type === "village" && /panduwa|pandua|पंडुवा|पंडुआ/.test(n)) {
-    aliases.push("panduwa", "pandua", "पंडुवा", "पंडुआ");
+    result.push("panduwa", "pandua", "पंडुवा", "पंडुआ");
   }
 
-  if (type === "district" && /prayagraj|प्रयागराज|allahabad|इलाहाबाद/.test(n)) {
-    aliases.push("prayagraj", "allahabad", "प्रयागराज", "इलाहाबाद");
+  if (type === "district" &&
+      /prayagraj|allahabad|प्रयागराज|इलाहाबाद/.test(n)) {
+    result.push("prayagraj", "allahabad", "प्रयागराज", "इलाहाबाद");
   }
 
-  if (type === "state" && /uttar pradesh|uttarpradesh|उत्तर प्रदेश|up/.test(n)) {
-    aliases.push("uttar pradesh", "uttarpradesh", "उत्तर प्रदेश");
+  if (type === "state" &&
+      /uttar pradesh|uttarpradesh|उत्तर प्रदेश|^up$/.test(n)) {
+    result.push("uttar pradesh", "uttarpradesh", "उत्तर प्रदेश");
   }
 
-  return [...new Set(aliases.filter(Boolean))];
+  if (type === "tehsil" && /bara|बारा/.test(n)) {
+    result.push("bara", "बारा");
+  }
+
+  return [...new Set(result.filter(Boolean))];
 }
 
-function containsPhrase(text, phrase) {
+function containsLocation(text, value, type) {
   const haystack = ` ${normalize(text)} `;
-  const needle = ` ${normalize(phrase)} `;
-  return needle.trim().length > 0 && haystack.includes(needle);
+
+  return aliases(value, type).some(alias => {
+    return haystack.includes(` ${normalize(alias)} `);
+  });
 }
 
-function hasLocation(text, value, type) {
-  const aliases = aliasesFor(value, type);
-  return aliases.some((alias) => containsPhrase(text, alias));
-}
-
-function getResultText(item) {
+function resultText(item) {
   return [
     item.name,
     item.title,
@@ -88,7 +88,7 @@ function getResultText(item) {
   ].filter(Boolean).join(" ");
 }
 
-function validHttpUrl(value) {
+function validUrl(value) {
   try {
     const u = new URL(value);
     return u.protocol === "https:" || u.protocol === "http:";
@@ -97,122 +97,138 @@ function validHttpUrl(value) {
   }
 }
 
-function freshnessValue(range) {
-  const values = {
+function exactVillageMatch(item, f) {
+  const text = resultText(item);
+
+  return (
+    containsLocation(text, f.state, "state") &&
+    containsLocation(text, f.district, "district") &&
+    containsLocation(text, f.tehsil, "tehsil") &&
+    containsLocation(text, f.village, "village")
+  );
+}
+
+function getFreshness(value) {
+  const map = {
     today: "oneDay",
     week: "oneWeek",
     month: "oneMonth",
     year: "oneYear",
     all: "noLimit"
   };
-  return values[range] || "noLimit";
+
+  return map[value] || "noLimit";
 }
 
-function makeSearchQuery(filters, exact) {
-  const parts = [];
-
-  if (exact) {
-    parts.push(`"${filters.village}"`);
-    parts.push(`"${filters.tehsil}"`);
-    parts.push(`"${filters.district}"`);
-    parts.push(`"${filters.state}"`);
-  } else {
-    parts.push(`"${filters.district}"`);
-    parts.push(`"${filters.state}"`);
-    if (filters.tehsil) parts.push(`"${filters.tehsil}"`);
-  }
-
-  if (filters.keyword) parts.push(filters.keyword);
-  if (filters.category) parts.push(filters.category);
-
-  parts.push("government scheme official information India");
-  parts.push("site:gov.in OR site:nic.in");
-
-  return parts.join(" ");
+function makeExactQuery(f) {
+  return [
+    f.keyword,
+    f.category,
+    f.village,
+    f.tehsil,
+    f.district,
+    f.state,
+    "India government scheme official information"
+  ].filter(Boolean).join(" ");
 }
 
-function matchesExactLocation(item, filters) {
-  const text = getResultText(item);
-
-  return (
-    hasLocation(text, filters.state, "state") &&
-    hasLocation(text, filters.district, "district") &&
-    hasLocation(text, filters.tehsil, "tehsil") &&
-    hasLocation(text, filters.village, "village")
-  );
+function makeRegionalQuery(f, includeTehsil = true) {
+  return [
+    f.keyword,
+    f.category,
+    includeTehsil ? f.tehsil : "",
+    f.district,
+    f.state,
+    "India government scheme official information"
+  ].filter(Boolean).join(" ");
 }
 
-function matchesRegionalLocation(item, filters) {
-  const text = getResultText(item);
-
-  return (
-    hasLocation(text, filters.state, "state") &&
-    hasLocation(text, filters.district, "district")
-  );
-}
-
-function mapSearchResult(item, level) {
-  return {
-    title: clean(item.name || item.title || "योजना की जानकारी", 500),
-    description: clean(item.text || item.snippet || item.description || "स्रोत वेबसाइट पर जानकारी देखें।", 3000),
-    url: item.url,
-    date: item.datePublished || item.date || null,
-    level,
-    villageConfirmed: level === "village"
-  };
-}
-
-async function searchLangSearch(query, freshness) {
+async function langSearch(query, freshness) {
   if (!LANGSEARCH_API_KEY) {
-    const error = new Error("LANGSEARCH_API_KEY सेट नहीं है।");
-    error.status = 503;
-    throw error;
+    throw new Error("LANGSEARCH_API_KEY Render में सेट नहीं है।");
   }
 
-  const response = await fetch("https://api.langsearch.com/v1/web-search", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${LANGSEARCH_API_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      query,
-      count: 50,
-      freshness,
-      contents: {
-        text: {
-          max_characters: 4000
+  const response = await fetch(
+    "https://api.langsearch.com/v1/web-search",
+    {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${LANGSEARCH_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        query,
+        count: 30,
+        freshness,
+        contents: {
+          text: {
+            max_characters: 2500
+          }
         }
-      }
-    }),
-    signal: AbortSignal.timeout(30000)
-  });
+      }),
+      signal: AbortSignal.timeout(30000)
+    }
+  );
 
   const raw = await response.text();
-  let payload = {};
+  let data;
 
   try {
-    payload = raw ? JSON.parse(raw) : {};
+    data = JSON.parse(raw);
   } catch {
-    throw new Error("LangSearch ने पढ़ने योग्य JSON जवाब नहीं दिया।");
+    throw new Error("LangSearch का जवाब सही JSON में नहीं आया।");
   }
 
   if (!response.ok) {
-    console.error("LangSearch error:", response.status, raw.slice(0, 1000));
-    const error = new Error(
-      payload.message || payload.error || `Online search failed (${response.status})`
+    console.error("LangSearch HTTP error:", response.status, raw.slice(0, 500));
+    throw new Error(
+      data.message || data.error || `Search HTTP error ${response.status}`
     );
-    error.status = 502;
-    throw error;
   }
 
-  const list =
-    payload?.data?.webPages?.value ||
-    payload?.data?.web_pages?.value ||
-    payload?.webPages?.value ||
-    [];
+  if (data.code && String(data.code) !== "200") {
+    console.error("LangSearch API error:", data);
+    throw new Error(data.message || "LangSearch API ने खोज स्वीकार नहीं की।");
+  }
 
-  return Array.isArray(list) ? list : [];
+  const results = data?.data?.webPages?.value || [];
+
+  return Array.isArray(results) ? results : [];
+}
+
+function prepareResult(item, level, filters) {
+  const text = resultText(item);
+
+  return {
+    title: clean(item.name || item.title || "योजना की जानकारी", 500),
+    description: clean(
+      item.text || item.snippet || item.description || "स्रोत वेबसाइट पर जानकारी देखें।",
+      3000
+    ),
+    url: item.url,
+    date: item.datePublished || item.date || null,
+    level,
+    villageConfirmed: level === "village",
+    locationMatch: {
+      state: containsLocation(text, filters.state, "state"),
+      district: containsLocation(text, filters.district, "district"),
+      tehsil: containsLocation(text, filters.tehsil, "tehsil"),
+      village: containsLocation(text, filters.village, "village")
+    }
+  };
+}
+
+function uniqueResults(results) {
+  const seen = new Set();
+
+  return results.filter(item => {
+    const key = String(item.url || "").toLowerCase();
+
+    if (!key || seen.has(key)) return false;
+
+    seen.add(key);
+    return true;
+  });
 }
 
 async function initDatabase() {
@@ -236,30 +252,32 @@ function requireAdmin(req, res, next) {
   if (!ADMIN_KEY) {
     return res.status(503).json({
       ok: false,
-      message: "ADMIN_KEY Render Environment Variables में सेट नहीं है।"
+      message: "ADMIN_KEY सेट नहीं है।"
     });
   }
 
-  const supplied = req.headers["x-admin-key"];
-
-  if (!supplied || supplied !== ADMIN_KEY) {
+  if (req.headers["x-admin-key"] !== ADMIN_KEY) {
     return res.status(401).json({
       ok: false,
-      message: "Admin key गलत है।"
+      message: "Admin Key गलत है।"
     });
   }
 
   next();
 }
 
+// Health check
 app.get("/api/health", async (req, res) => {
   try {
-    const db = await pool.query("SELECT 1");
-    const count = await pool.query("SELECT COUNT(*)::int AS total FROM saved_schemes");
+    await pool.query("SELECT 1");
+
+    const count = await pool.query(
+      "SELECT COUNT(*)::int AS total FROM saved_schemes"
+    );
 
     res.json({
       ok: true,
-      database: db.rowCount ? "connected" : "unknown",
+      database: "connected",
       savedSchemes: count.rows[0].total,
       onlineSearchConfigured: Boolean(LANGSEARCH_API_KEY)
     });
@@ -272,9 +290,10 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
+// Main online search
 app.post("/api/search", async (req, res) => {
   try {
-    const filters = {
+    const f = {
       state: clean(req.body.state, 100),
       district: clean(req.body.district, 100),
       tehsil: clean(req.body.tehsil, 100),
@@ -284,87 +303,122 @@ app.post("/api/search", async (req, res) => {
       dateRange: clean(req.body.dateRange, 20) || "all"
     };
 
-    const missing = ["state", "district", "tehsil", "village"]
-      .filter((key) => !filters[key]);
+    const required = ["state", "district", "tehsil", "village"];
 
-    if (missing.length) {
+    if (required.some(key => !f[key])) {
       return res.status(400).json({
         ok: false,
-        message: "राज्य, जिला, तहसील और गाँव चारों भरना जरूरी है।"
+        message: "राज्य, जिला, तहसील और गाँव चारों भरें।"
       });
     }
 
-    if (!filters.keyword && !filters.category) {
+    if (!f.keyword && !f.category) {
       return res.status(400).json({
         ok: false,
         message: "योजना का नाम या श्रेणी भरें।"
       });
     }
 
-    const freshness = freshnessValue(filters.dateRange);
-    const exactQuery = makeSearchQuery(filters, true);
-    const regionalQuery = makeSearchQuery(filters, false);
+    const freshness = getFreshness(f.dateRange);
 
-    console.log("Exact search:", exactQuery);
+    const exactQuery = makeExactQuery(f);
+    const regionalQuery = makeRegionalQuery(f, true);
 
-    const exactRaw = await searchLangSearch(exactQuery, freshness);
-    const exactResults = exactRaw
-      .filter((item) => item && validHttpUrl(item.url))
-      .filter((item) => matchesExactLocation(item, filters))
-      .map((item) => mapSearchResult(item, "village"));
+    console.log("Village search:", exactQuery);
+
+    // First search: exact village
+    const exactRaw = await langSearch(exactQuery, freshness);
+
+    const exactResults = uniqueResults(
+      exactRaw
+        .filter(item => item && validUrl(item.url))
+        .filter(item => exactVillageMatch(item, f))
+        .map(item => prepareResult(item, "village", f))
+    );
 
     let regionalResults = [];
+    let broadResults = [];
 
+    // Second search: tehsil and district
     if (exactResults.length === 0) {
-      console.log("No exact village match. Trying district-level search.");
+      console.log("Trying tehsil and district search");
 
-      const regionalRaw = await searchLangSearch(regionalQuery, freshness);
+      const regionalRaw = await langSearch(regionalQuery, freshness);
 
-      regionalResults = regionalRaw
-        .filter((item) => item && validHttpUrl(item.url))
-        .filter((item) => matchesRegionalLocation(item, filters))
-        .filter((item) => !matchesExactLocation(item, filters))
-        .map((item) => mapSearchResult(item, "regional"));
+      regionalResults = uniqueResults(
+        regionalRaw
+          .filter(item => item && validUrl(item.url))
+          .map(item => prepareResult(item, "regional", f))
+      );
     }
 
-    console.log({
-      receivedExact: exactRaw.length,
-      matchedExact: exactResults.length,
-      matchedRegional: regionalResults.length
+    // Third search: district and state, only if still no results
+    if (exactResults.length === 0 && regionalResults.length === 0) {
+      console.log("Trying district and state search");
+
+      const broadQuery = makeRegionalQuery(f, false);
+      const broadRaw = await langSearch(broadQuery, freshness);
+
+      broadResults = uniqueResults(
+        broadRaw
+          .filter(item => item && validUrl(item.url))
+          .map(item => prepareResult(item, "general", f))
+      );
+    }
+
+    const regional = regionalResults.length
+      ? regionalResults
+      : broadResults;
+
+    console.log("Search counts:", {
+      exactReceived: exactRaw.length,
+      exactMatched: exactResults.length,
+      regionalMatched: regionalResults.length,
+      generalMatched: broadResults.length
     });
 
     res.json({
       ok: true,
-      location: filters,
+      location: f,
       exactResults,
-      regionalResults,
+      regionalResults: regional,
       message: exactResults.length
-        ? "चारों स्थानों का मिलान करने वाले परिणाम मिले।"
+        ? "गाँव के चारों स्थानों का मिलान करने वाले परिणाम मिले।"
         : regionalResults.length
-          ? "गाँव का पक्का मिलान नहीं मिला। नीचे जिला/राज्य के परिणाम अलग दिखाए गए हैं।"
-          : "इस स्थान के लिए मिलान वाला परिणाम नहीं मिला।"
+          ? "गाँव की पुष्टि नहीं हुई। तहसील और जिले की खोज के परिणाम नीचे हैं।"
+          : broadResults.length
+            ? "गाँव की पुष्टि नहीं हुई। जिले और राज्य की सामान्य योजनाएँ नीचे हैं।"
+            : "इन खोज शब्दों पर LangSearch से कोई परिणाम नहीं मिला।"
     });
+
   } catch (err) {
     console.error("Search error:", err);
-    res.status(err.status || 500).json({
+
+    res.status(500).json({
       ok: false,
       message: err.message || "खोज करते समय समस्या हुई।"
     });
   }
 });
 
+// Saved schemes
 app.get("/api/saved", async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT * FROM saved_schemes ORDER BY created_at DESC LIMIT 100"
     );
+
     res.json({ ok: true, results: result.rows });
   } catch (err) {
-    console.error("Saved list error:", err);
-    res.status(500).json({ ok: false, message: "सेव किए गए रिकॉर्ड नहीं मिल सके।" });
+    console.error("Saved error:", err);
+    res.status(500).json({
+      ok: false,
+      message: "सेव किए गए रिकॉर्ड नहीं मिल सके।"
+    });
   }
 });
 
+// Save scheme
 app.post("/api/admin/schemes", requireAdmin, async (req, res) => {
   try {
     const title = clean(req.body.title, 500);
@@ -374,10 +428,10 @@ app.post("/api/admin/schemes", requireAdmin, async (req, res) => {
     const category = clean(req.body.category, 100);
     const publishedDate = clean(req.body.published_date, 50);
 
-    if (!title || !sourceUrl || !validHttpUrl(sourceUrl)) {
+    if (!title || !validUrl(sourceUrl)) {
       return res.status(400).json({
         ok: false,
-        message: "योजना का नाम और सही http/https स्रोत लिंक जरूरी है।"
+        message: "योजना का नाम और सही स्रोत लिंक जरूरी है।"
       });
     }
 
@@ -390,18 +444,26 @@ app.post("/api/admin/schemes", requireAdmin, async (req, res) => {
     );
 
     res.json({ ok: true, record: result.rows[0] });
+
   } catch (err) {
-    console.error("Save scheme error:", err);
-    res.status(500).json({ ok: false, message: "जानकारी सेव नहीं हो सकी।" });
+    console.error("Save error:", err);
+    res.status(500).json({
+      ok: false,
+      message: "जानकारी सेव नहीं हो सकी।"
+    });
   }
 });
 
+// Delete scheme
 app.delete("/api/admin/schemes/:id", requireAdmin, async (req, res) => {
   try {
     const id = Number(req.params.id);
 
     if (!Number.isInteger(id) || id < 1) {
-      return res.status(400).json({ ok: false, message: "गलत रिकॉर्ड ID।" });
+      return res.status(400).json({
+        ok: false,
+        message: "गलत रिकॉर्ड ID।"
+      });
     }
 
     const result = await pool.query(
@@ -410,16 +472,27 @@ app.delete("/api/admin/schemes/:id", requireAdmin, async (req, res) => {
     );
 
     if (!result.rowCount) {
-      return res.status(404).json({ ok: false, message: "रिकॉर्ड नहीं मिला।" });
+      return res.status(404).json({
+        ok: false,
+        message: "रिकॉर्ड नहीं मिला।"
+      });
     }
 
-    res.json({ ok: true, message: "रिकॉर्ड डिलीट हो गया।" });
+    res.json({
+      ok: true,
+      message: "रिकॉर्ड डिलीट हो गया।"
+    });
+
   } catch (err) {
-    console.error("Delete scheme error:", err);
-    res.status(500).json({ ok: false, message: "रिकॉर्ड डिलीट नहीं हुआ।" });
+    console.error("Delete error:", err);
+    res.status(500).json({
+      ok: false,
+      message: "रिकॉर्ड डिलीट नहीं हुआ।"
+    });
   }
 });
 
+// Frontend
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("*", (req, res) => {
@@ -429,10 +502,10 @@ app.get("*", (req, res) => {
 initDatabase()
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`Bharat Yojana Finder running on port ${PORT}`);
+      console.log("Bharat Yojana Finder running on port", PORT);
     });
   })
-  .catch((err) => {
+  .catch(err => {
     console.error("Database initialization failed:", err);
     process.exit(1);
   });
