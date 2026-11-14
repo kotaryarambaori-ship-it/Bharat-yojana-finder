@@ -1,0 +1,236 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bharat Yojana Finder 🇮🇳</title>
+<meta name="theme-color" content="#14532d">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9;color:#172033}
+header{background:linear-gradient(120deg,#14532d,#15803d,#0e7490);color:white;padding:25px 16px;text-align:center}
+header h1{margin:0 0 8px;font-size:25px}
+header p{margin:0;font-size:14px}
+main{max-width:760px;margin:auto;padding:15px}
+.card{background:white;padding:17px;border-radius:15px;margin-bottom:15px;box-shadow:0 3px 14px #0000000c}
+h2{font-size:19px;margin:0 0 14px}
+input,select,button{width:100%;padding:13px;margin:6px 0;border:1px solid #cbd5e1;border-radius:9px;font-size:15px}
+button{background:#15803d;color:white;border:0;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.6}
+.result{border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin:12px 0}
+.result h3{margin:0 0 8px;font-size:17px}
+.result p{font-size:14px;line-height:1.5;color:#475569}
+a{color:#087443;overflow-wrap:anywhere}
+.small{font-size:12px;color:#64748b}
+.tag{display:inline-block;background:#dcfce7;color:#166534;padding:5px 9px;border-radius:20px;font-size:12px}
+footer{text-align:center;padding:20px;color:#64748b;font-size:12px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🇮🇳 Bharat Yojana Finder</h1>
+  <p>सरकारी योजनाएँ, छात्रवृत्ति, नौकरी और किसान सहायता की जानकारी</p>
+</header>
+
+<main>
+
+<section class="card">
+<h2>🔎 योजना खोजें</h2>
+
+<input id="keyword" placeholder="योजना का नाम या जानकारी लिखें">
+
+<select id="state">
+<option value="">सभी राज्य</option>
+<option>Uttar Pradesh</option>
+<option>Bihar</option>
+<option>Madhya Pradesh</option>
+<option>Rajasthan</option>
+<option>Gujarat</option>
+<option>Maharashtra</option>
+<option>Delhi</option>
+<option>All India</option>
+</select>
+
+<select id="category">
+<option value="">सभी श्रेणियाँ</option>
+<option>Farmer Scheme</option>
+<option>Scholarship</option>
+<option>Employment</option>
+<option>Pension</option>
+<option>Housing</option>
+<option>Health</option>
+<option>Women Welfare</option>
+</select>
+
+<select id="dateRange">
+<option value="">कोई तारीख सीमा नहीं</option>
+<option value="today">आज</option>
+<option value="week">पिछले 7 दिन</option>
+<option value="month">पिछले 30 दिन</option>
+<option value="three">पिछले 3 महीने</option>
+</select>
+
+<button id="searchBtn" onclick="searchSchemes()">योजना खोजें</button>
+<p class="small">जानकारी इंटरनेट से खोजी जाएगी। आवेदन की पात्रता और अंतिम तारीख आधिकारिक वेबसाइट पर जाँचें।</p>
+</section>
+
+<section class="card">
+<h2>📋 खोज के परिणाम</h2>
+<div id="results">यहाँ योजनाओं की जानकारी दिखाई देगी।</div>
+</section>
+
+<section class="card">
+<h2>⭐ सेव की गई योजनाएँ</h2>
+<button onclick="loadSaved()">सेव योजनाएँ देखें</button>
+<div id="saved">अभी लोड नहीं हुई हैं।</div>
+</section>
+
+<section class="card">
+<h2>🔐 एडमिन पैनल</h2>
+<input id="adminKey" type="password" placeholder="Admin Key">
+<input id="adminTitle" placeholder="योजना का नाम">
+<input id="adminDescription" placeholder="योजना का विवरण">
+<input id="adminUrl" placeholder="आधिकारिक स्रोत लिंक">
+<input id="adminState" placeholder="राज्य">
+<input id="adminCategory" placeholder="श्रेणी">
+<input id="adminDate" type="date">
+<button onclick="saveScheme()">योजना सेव करें</button>
+<p id="adminMessage" class="small"></p>
+</section>
+
+</main>
+
+<footer>
+Bharat Yojana Finder | जानकारी के लिए आधिकारिक सरकारी स्रोत देखें।
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function escapeHTML(value) {
+  return String(value || "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[char]));
+}
+
+function safeURL(value) {
+  try {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
+async function searchSchemes() {
+  const q = $("keyword").value.trim();
+  if (!q) {
+    alert("योजना या जानकारी का नाम लिखें");
+    return;
+  }
+
+  $("searchBtn").disabled = true;
+  $("results").textContent = "इंटरनेट पर खोज रहे हैं...";
+
+  try {
+    const params = new URLSearchParams({
+      q,
+      state: $("state").value,
+      category: $("category").value,
+      dateRange: $("dateRange").value
+    });
+
+    const response = await fetch("/api/search?" + params);
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.error || "Search failed");
+
+    if (!data.results || !data.results.length) {
+      $("results").textContent = "कोई परिणाम नहीं मिला। दूसरे शब्दों से खोजें।";
+      return;
+    }
+
+    $("results").innerHTML = data.results.map(item => {
+      const url = safeURL(item.url);
+      return `
+        <article class="result">
+          <h3>${escapeHTML(item.title)}</h3>
+          <p>${escapeHTML(item.description)}</p>
+          <p class="small">${escapeHTML(item.publishedDate || "प्रकाशित तारीख उपलब्ध नहीं")}</p>
+          ${url ? `<a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">मूल स्रोत देखें ↗</a>` : ""}
+        </article>`;
+    }).join("");
+
+  } catch (error) {
+    $("results").textContent = "खोज में समस्या: " + error.message;
+  } finally {
+    $("searchBtn").disabled = false;
+  }
+}
+
+async function loadSaved() {
+  $("saved").textContent = "लोड हो रहा है...";
+  try {
+    const response = await fetch("/api/saved");
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Load failed");
+
+    if (!data.results.length) {
+      $("saved").textContent = "अभी कोई सेव योजना नहीं है।";
+      return;
+    }
+
+    $("saved").innerHTML = data.results.map(item => {
+      const url = safeURL(item.source_url);
+      return `
+        <article class="result">
+          <h3>${escapeHTML(item.title)}</h3>
+          <p>${escapeHTML(item.description)}</p>
+          <span class="tag">${escapeHTML(item.state || "All India")}</span>
+          ${url ? `<p><a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">स्रोत देखें ↗</a></p>` : ""}
+        </article>`;
+    }).join("");
+  } catch (error) {
+    $("saved").textContent = "लोड नहीं हुआ: " + error.message;
+  }
+}
+
+async function saveScheme() {
+  $("adminMessage").textContent = "सेव हो रहा है...";
+  try {
+    const response = await fetch("/api/admin/schemes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-key": $("adminKey").value
+      },
+      body: JSON.stringify({
+        title: $("adminTitle").value,
+        description: $("adminDescription").value,
+        source_url: $("adminUrl").value,
+        state: $("adminState").value,
+        category: $("adminCategory").value,
+        published_date: $("adminDate").value || null
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Save failed");
+
+    $("adminMessage").textContent = "योजना सफलतापूर्वक सेव हुई।";
+    loadSaved();
+  } catch (error) {
+    $("adminMessage").textContent = "सेव नहीं हुआ: " + error.message;
+  }
+}
+</script>
+
+</body>
+  </html>
+                                     
