@@ -2,235 +2,365 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bharat Yojana Finder 🇮🇳</title>
-<meta name="theme-color" content="#14532d">
-<style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9;color:#172033}
-header{background:linear-gradient(120deg,#14532d,#15803d,#0e7490);color:white;padding:25px 16px;text-align:center}
-header h1{margin:0 0 8px;font-size:25px}
-header p{margin:0;font-size:14px}
-main{max-width:760px;margin:auto;padding:15px}
-.card{background:white;padding:17px;border-radius:15px;margin-bottom:15px;box-shadow:0 3px 14px #0000000c}
-h2{font-size:19px;margin:0 0 14px}
-input,select,button{width:100%;padding:13px;margin:6px 0;border:1px solid #cbd5e1;border-radius:9px;font-size:15px}
-button{background:#15803d;color:white;border:0;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.6}
-.result{border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin:12px 0}
-.result h3{margin:0 0 8px;font-size:17px}
-.result p{font-size:14px;line-height:1.5;color:#475569}
-a{color:#087443;overflow-wrap:anywhere}
-.small{font-size:12px;color:#64748b}
-.tag{display:inline-block;background:#dcfce7;color:#166534;padding:5px 9px;border-radius:20px;font-size:12px}
-footer{text-align:center;padding:20px;color:#64748b;font-size:12px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#075985">
+  <title>Bharat Yojana Finder</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#f1f5f9;color:#172033;font-family:Arial,sans-serif}
+    header{background:linear-gradient(135deg,#075985,#2563eb);color:white;padding:25px 16px;text-align:center}
+    header h1{margin:0 0 8px;font-size:25px}
+    header p{margin:0;font-size:14px}
+    main{max-width:850px;margin:auto;padding:14px}
+    .card{background:white;padding:17px;border-radius:14px;margin:14px 0;box-shadow:0 3px 14px #0000000c}
+    h2{font-size:19px;margin:0 0 15px}
+    label{font-size:14px;font-weight:bold;display:block;margin:12px 0 6px}
+    input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px;background:white}
+    button{border:0;border-radius:9px;padding:12px 16px;background:#075985;color:white;font-size:15px;font-weight:bold;cursor:pointer}
+    button:disabled{opacity:.6}
+    .searchbtn{width:100%;margin-top:17px;background:#ea580c}
+    .result{border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin:12px 0;background:#fff}
+    .result h3{margin:0 0 9px;font-size:17px;color:#075985}
+    .result p{font-size:14px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+    .source{font-size:12px;color:#64748b;overflow-wrap:anywhere}
+    a{color:#0369a1;overflow-wrap:anywhere}
+    .smallbtn{font-size:13px;padding:9px 12px;margin-top:8px}
+    .green{background:#15803d}
+    .red{background:#b91c1c}
+    .muted{color:#64748b;font-size:13px}
+    .status{padding:12px;background:#e0f2fe;border-radius:9px;margin:12px 0;font-size:14px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    footer{text-align:center;color:#64748b;padding:22px;font-size:12px}
+    @media(max-width:520px){.grid{grid-template-columns:1fr}header h1{font-size:22px}}
+  </style>
 </head>
 <body>
 
 <header>
   <h1>🇮🇳 Bharat Yojana Finder</h1>
-  <p>सरकारी योजनाएँ, छात्रवृत्ति, नौकरी और किसान सहायता की जानकारी</p>
+  <p>अपने क्षेत्र की सरकारी योजनाएँ और सुविधाएँ खोजें</p>
 </header>
 
 <main>
 
-<section class="card">
-<h2>🔎 योजना खोजें</h2>
+  <section class="card">
+    <h2>📍 अपने क्षेत्र की जानकारी भरें</h2>
 
-<input id="keyword" placeholder="योजना का नाम या जानकारी लिखें">
+    <label>राज्य</label>
+    <input id="state" placeholder="जैसे उत्तर प्रदेश">
 
-<select id="state">
-<option value="">सभी राज्य</option>
-<option>Uttar Pradesh</option>
-<option>Bihar</option>
-<option>Madhya Pradesh</option>
-<option>Rajasthan</option>
-<option>Gujarat</option>
-<option>Maharashtra</option>
-<option>Delhi</option>
-<option>All India</option>
-</select>
+    <label>जिला</label>
+    <input id="district" placeholder="जैसे प्रयागराज">
 
-<select id="category">
-<option value="">सभी श्रेणियाँ</option>
-<option>Farmer Scheme</option>
-<option>Scholarship</option>
-<option>Employment</option>
-<option>Pension</option>
-<option>Housing</option>
-<option>Health</option>
-<option>Women Welfare</option>
-</select>
+    <label>तहसील</label>
+    <input id="tehsil" placeholder="जैसे बारा">
 
-<select id="dateRange">
-<option value="">कोई तारीख सीमा नहीं</option>
-<option value="today">आज</option>
-<option value="week">पिछले 7 दिन</option>
-<option value="month">पिछले 30 दिन</option>
-<option value="three">पिछले 3 महीने</option>
-</select>
+    <label>गाँव</label>
+    <input id="village" placeholder="जैसे XYZ या अपने गाँव का नाम">
 
-<button id="searchBtn" onclick="searchSchemes()">योजना खोजें</button>
-<p class="small">जानकारी इंटरनेट से खोजी जाएगी। आवेदन की पात्रता और अंतिम तारीख आधिकारिक वेबसाइट पर जाँचें।</p>
-</section>
+    <label>क्या खोजें?</label>
+    <input id="keyword" placeholder="जैसे किसान सम्मान निधि, छात्रवृत्ति, पेंशन">
 
-<section class="card">
-<h2>📋 खोज के परिणाम</h2>
-<div id="results">यहाँ योजनाओं की जानकारी दिखाई देगी।</div>
-</section>
+    <label>योजना की श्रेणी</label>
+    <select id="category">
+      <option value="all">सभी योजनाएँ</option>
+      <option value="farmer schemes">किसान योजनाएँ</option>
+      <option value="scholarship">छात्रवृत्ति</option>
+      <option value="employment jobs">रोजगार और नौकरी</option>
+      <option value="pension">पेंशन</option>
+      <option value="housing">आवास योजना</option>
+      <option value="health">स्वास्थ्य योजना</option>
+      <option value="women welfare">महिला कल्याण</option>
+      <option value="ration">राशन योजना</option>
+    </select>
 
-<section class="card">
-<h2>⭐ सेव की गई योजनाएँ</h2>
-<button onclick="loadSaved()">सेव योजनाएँ देखें</button>
-<div id="saved">अभी लोड नहीं हुई हैं।</div>
-</section>
+    <label>जानकारी की समय सीमा</label>
+    <select id="dateRange">
+      <option value="all">सभी उपलब्ध जानकारी</option>
+      <option value="today">आज की जानकारी</option>
+      <option value="week">पिछले 7 दिन</option>
+      <option value="month">पिछले 30 दिन</option>
+      <option value="year">पिछले 1 साल</option>
+    </select>
 
-<section class="card">
-<h2>🔐 एडमिन पैनल</h2>
-<input id="adminKey" type="password" placeholder="Admin Key">
-<input id="adminTitle" placeholder="योजना का नाम">
-<input id="adminDescription" placeholder="योजना का विवरण">
-<input id="adminUrl" placeholder="आधिकारिक स्रोत लिंक">
-<input id="adminState" placeholder="राज्य">
-<input id="adminCategory" placeholder="श्रेणी">
-<input id="adminDate" type="date">
-<button onclick="saveScheme()">योजना सेव करें</button>
-<p id="adminMessage" class="small"></p>
-</section>
+    <button class="searchbtn" id="searchBtn" onclick="searchSchemes()">
+      🔎 योजनाएँ खोजें
+    </button>
+
+    <div id="status"></div>
+  </section>
+
+  <section class="card">
+    <h2>🔍 इंटरनेट से मिले परिणाम</h2>
+    <div id="results">
+      <p class="muted">अपना क्षेत्र भरकर योजनाएँ खोजें।</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>⭐ सुरक्षित योजनाएँ</h2>
+    <button class="smallbtn green" onclick="loadSaved()">Saved Schemes देखें</button>
+    <div id="saved"></div>
+  </section>
+
+  <section class="card">
+    <h2>🔐 Admin Panel</h2>
+    <p class="muted">योजना सेव करने या हटाने के लिए Admin Key डालें।</p>
+
+    <label>Admin Key</label>
+    <input id="adminKey" type="password" placeholder="अपना Admin Password">
+
+    <label>योजना का नाम</label>
+    <input id="saveTitle" placeholder="योजना का नाम">
+
+    <label>योजना की जानकारी</label>
+    <textarea id="saveDescription" rows="4" placeholder="योजना का विवरण"></textarea>
+
+    <label>स्रोत लिंक</label>
+    <input id="saveUrl" placeholder="https://...">
+
+    <button class="smallbtn green" onclick="saveScheme()">योजना सेव करें</button>
+    <div id="adminStatus"></div>
+  </section>
 
 </main>
 
 <footer>
-Bharat Yojana Finder | जानकारी के लिए आधिकारिक सरकारी स्रोत देखें।
+  यह ऐप इंटरनेट पर उपलब्ध जानकारी खोजता है। आवेदन से पहले संबंधित सरकारी वेबसाइट पर पात्रता और नियम जरूर जाँचें।
 </footer>
 
 <script>
-const $ = id => document.getElementById(id);
+  const $ = id => document.getElementById(id);
 
-function escapeHTML(value) {
-  return String(value || "").replace(/[&<>"']/g, char => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#39;"
-  }[char]));
-}
+  let latestLocation = {};
 
-function safeURL(value) {
-  try {
-    const url = new URL(value);
-    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
-  } catch {
+  function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    })[char]);
+  }
+
+  function safeLink(value) {
+    try {
+      const url = new URL(value);
+      if (url.protocol === "https:" || url.protocol === "http:") {
+        return url.href;
+      }
+    } catch {}
     return "";
   }
-}
 
-async function searchSchemes() {
-  const q = $("keyword").value.trim();
-  if (!q) {
-    alert("योजना या जानकारी का नाम लिखें");
-    return;
-  }
+  async function searchSchemes() {
+    const state = $("state").value.trim();
+    const district = $("district").value.trim();
+    const tehsil = $("tehsil").value.trim();
+    const village = $("village").value.trim();
+    const q = $("keyword").value.trim();
 
-  $("searchBtn").disabled = true;
-  $("results").textContent = "इंटरनेट पर खोज रहे हैं...";
+    if (!state && !district && !tehsil && !village && !q) {
+      $("status").innerHTML =
+        '<div class="status">कृपया कोई स्थान या खोज का नाम भरें।</div>';
+      return;
+    }
 
-  try {
+    latestLocation = {state, district, tehsil, village};
+
     const params = new URLSearchParams({
+      state,
+      district,
+      tehsil,
+      village,
       q,
-      state: $("state").value,
       category: $("category").value,
       dateRange: $("dateRange").value
     });
 
-    const response = await fetch("/api/search?" + params);
-    const data = await response.json();
+    $("searchBtn").disabled = true;
+    $("searchBtn").textContent = "खोज जारी है...";
+    $("status").innerHTML =
+      '<div class="status">इंटरनेट पर जानकारी खोजी जा रही है। कृपया प्रतीक्षा करें...</div>';
+    $("results").innerHTML = "";
 
-    if (!response.ok) throw new Error(data.error || "Search failed");
+    try {
+      const response = await fetch("/api/search?" + params.toString());
+      const data = await response.json();
 
-    if (!data.results || !data.results.length) {
-      $("results").textContent = "कोई परिणाम नहीं मिला। दूसरे शब्दों से खोजें।";
+      if (!response.ok) {
+        throw new Error(data.error || "Search failed");
+      }
+
+      if (!data.results || data.results.length === 0) {
+        $("results").innerHTML =
+          '<div class="status">इस खोज के लिए कोई परिणाम नहीं मिला। दूसरे शब्दों से खोजें।</div>';
+        $("status").innerHTML = "";
+        return;
+      }
+
+      $("status").innerHTML =
+        '<div class="status">कुल ' + data.count + ' परिणाम मिले। ये इंटरनेट से मिले परिणाम हैं, सरकारी सत्यापन नहीं।</div>';
+
+      $("results").innerHTML = data.results.map((item, index) => {
+        const title = escapeHTML(item.title);
+        const description = escapeHTML(item.description);
+        const source = escapeHTML(item.source || "");
+        const date = escapeHTML(item.date || "तारीख उपलब्ध नहीं");
+        const link = safeLink(item.url);
+
+        return `
+          <article class="result">
+            <h3>${title}</h3>
+            <p>${description}</p>
+            <div class="source">स्रोत: ${source} | तारीख: ${date}</div>
+            ${link ? `<p><a href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer">मूल वेबसाइट खोलें ↗</a></p>` : ""}
+            <button class="smallbtn green"
+              onclick="prepareSave(${index})">Admin के लिए सेव करें</button>
+          </article>
+        `;
+      }).join("");
+
+      window.currentResults = data.results;
+
+    } catch (error) {
+      $("status").innerHTML =
+        '<div class="status">त्रुटि: ' + escapeHTML(error.message) + '</div>';
+    } finally {
+      $("searchBtn").disabled = false;
+      $("searchBtn").textContent = "🔎 योजनाएँ खोजें";
+    }
+  }
+
+  function prepareSave(index) {
+    const item = window.currentResults?.[index];
+    if (!item) return;
+
+    $("saveTitle").value = item.title || "";
+    $("saveDescription").value = item.description || "";
+    $("saveUrl").value = item.url || "";
+
+    $("adminStatus").innerHTML =
+      '<div class="status">योजना भर दी गई है। अब Admin Key डालकर सेव करें।</div>';
+
+    $("adminKey").scrollIntoView({behavior:"smooth", block:"center"});
+  }
+
+  async function saveScheme() {
+    const key = $("adminKey").value.trim();
+    const title = $("saveTitle").value.trim();
+
+    if (!key || !title) {
+      $("adminStatus").textContent = "Admin Key और योजना का नाम भरें।";
       return;
     }
 
-    $("results").innerHTML = data.results.map(item => {
-      const url = safeURL(item.url);
-      return `
-        <article class="result">
-          <h3>${escapeHTML(item.title)}</h3>
-          <p>${escapeHTML(item.description)}</p>
-          <p class="small">${escapeHTML(item.publishedDate || "प्रकाशित तारीख उपलब्ध नहीं")}</p>
-          ${url ? `<a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">मूल स्रोत देखें ↗</a>` : ""}
-        </article>`;
-    }).join("");
+    const body = {
+      title,
+      description: $("saveDescription").value,
+      source_url: $("saveUrl").value,
+      state: latestLocation.state || $("state").value,
+      district: latestLocation.district || $("district").value,
+      tehsil: latestLocation.tehsil || $("tehsil").value,
+      village: latestLocation.village || $("village").value,
+      category: $("category").value
+    };
 
-  } catch (error) {
-    $("results").textContent = "खोज में समस्या: " + error.message;
-  } finally {
-    $("searchBtn").disabled = false;
+    try {
+      const response = await fetch("/api/admin/schemes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-key": key
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || "Save failed");
+
+      $("adminStatus").innerHTML =
+        '<div class="status">योजना सफलतापूर्वक सेव हो गई।</div>';
+
+      loadSaved();
+
+    } catch (error) {
+      $("adminStatus").innerHTML =
+        '<div class="status">सेव नहीं हुई: ' + escapeHTML(error.message) + '</div>';
+    }
   }
-}
 
-async function loadSaved() {
-  $("saved").textContent = "लोड हो रहा है...";
-  try {
-    const response = await fetch("/api/saved");
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Load failed");
+  async function loadSaved() {
+    $("saved").innerHTML = "लोड हो रहा है...";
 
-    if (!data.results.length) {
-      $("saved").textContent = "अभी कोई सेव योजना नहीं है।";
+    try {
+      const response = await fetch("/api/saved");
+      const data = await response.json();
+
+      if (!response.ok) throw new Error("Load failed");
+
+      const records = data.results || [];
+
+      if (!records.length) {
+        $("saved").innerHTML = '<p class="muted">अभी कोई रिकॉर्ड सेव नहीं है।</p>';
+        return;
+      }
+
+      $("saved").innerHTML = records.map(item => {
+        const link = safeLink(item.source_url);
+
+        return `
+          <div class="result">
+            <h3>${escapeHTML(item.title)}</h3>
+            <p>${escapeHTML(item.description || "")}</p>
+            <div class="source">
+              ${escapeHTML([item.state,item.district,item.tehsil,item.village].filter(Boolean).join(" / "))}
+            </div>
+            ${link ? `<p><a href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer">स्रोत खोलें ↗</a></p>` : ""}
+            <button class="smallbtn red" onclick="deleteScheme(${Number(item.id)})">Delete</button>
+          </div>
+        `;
+      }).join("");
+
+    } catch (error) {
+      $("saved").textContent = "Saved records लोड नहीं हुए।";
+    }
+  }
+
+  async function deleteScheme(id) {
+    const key = $("adminKey").value.trim();
+
+    if (!key) {
+      alert("पहले Admin Key डालें।");
       return;
     }
 
-    $("saved").innerHTML = data.results.map(item => {
-      const url = safeURL(item.source_url);
-      return `
-        <article class="result">
-          <h3>${escapeHTML(item.title)}</h3>
-          <p>${escapeHTML(item.description)}</p>
-          <span class="tag">${escapeHTML(item.state || "All India")}</span>
-          ${url ? `<p><a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">स्रोत देखें ↗</a></p>` : ""}
-        </article>`;
-    }).join("");
-  } catch (error) {
-    $("saved").textContent = "लोड नहीं हुआ: " + error.message;
+    if (!confirm("क्या आप यह रिकॉर्ड हटाना चाहते हैं?")) return;
+
+    try {
+      const response = await fetch("/api/admin/schemes/" + id, {
+        method: "DELETE",
+        headers: {"x-admin-key": key}
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || "Delete failed");
+
+      alert("रिकॉर्ड हटा दिया गया।");
+      loadSaved();
+
+    } catch (error) {
+      alert(error.message);
+    }
   }
-}
 
-async function saveScheme() {
-  $("adminMessage").textContent = "सेव हो रहा है...";
-  try {
-    const response = await fetch("/api/admin/schemes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-admin-key": $("adminKey").value
-      },
-      body: JSON.stringify({
-        title: $("adminTitle").value,
-        description: $("adminDescription").value,
-        source_url: $("adminUrl").value,
-        state: $("adminState").value,
-        category: $("adminCategory").value,
-        published_date: $("adminDate").value || null
-      })
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Save failed");
-
-    $("adminMessage").textContent = "योजना सफलतापूर्वक सेव हुई।";
-    loadSaved();
-  } catch (error) {
-    $("adminMessage").textContent = "सेव नहीं हुआ: " + error.message;
-  }
-}
+  loadSaved();
 </script>
 
 </body>
-  </html>
-                                     
+      </html>
+      
