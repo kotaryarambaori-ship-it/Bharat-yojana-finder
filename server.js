@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.set("trust proxy", 1);
-app.use(express.json({ limit: "200kb" }));
+app.use(express.json({ limit: "15mb" }));
 
 const {
   DATABASE_URL,
@@ -32,11 +32,11 @@ const pool = new Pool({
 });
 
 pool.on("error", err => {
-  console.error("DB error:", err.message);
+  console.error("Database error:", err.message);
 });
 
-function clean(value, max = 200) {
-  return String(value || "").trim().slice(0, max);
+function clean(value, max = 500) {
+  return String(value ?? "").trim().slice(0, max);
 }
 
 function normalize(value) {
@@ -48,78 +48,6 @@ function normalize(value) {
     .trim();
 }
 
-function aliases(value, type) {
-  const n = normalize(value);
-  const result = [n];
-
-  if (
-    type === "village" &&
-    /panduwa|pandua|पंडुवा|पंडुआ/.test(n)
-  ) {
-    result.push("panduwa", "pandua", "पंडुवा", "पंडुआ");
-  }
-
-  if (
-    type === "district" &&
-    /prayagraj|allahabad|प्रयागराज|इलाहाबाद/.test(n)
-  ) {
-    result.push(
-      "prayagraj",
-      "allahabad",
-      "प्रयागराज",
-      "इलाहाबाद"
-    );
-  }
-
-  if (
-    type === "state" &&
-    /uttar pradesh|uttarpradesh|उत्तर प्रदेश|^up$/.test(n)
-  ) {
-    result.push(
-      "uttar pradesh",
-      "uttarpradesh",
-      "उत्तर प्रदेश"
-    );
-  }
-
-  if (type === "tehsil" && /bara|बारा/.test(n)) {
-    result.push("bara", "बारा");
-  }
-
-  if (
-    type === "block" &&
-    /shankargarh|shankar garh|शंकरगढ़|शंकरगढ़/.test(n)
-  ) {
-    result.push(
-      "shankargarh",
-      "shankar garh",
-      "शंकरगढ़",
-      "शंकरगढ़"
-    );
-  }
-
-  return [...new Set(result.filter(Boolean))];
-}
-
-function containsLocation(text, value, type) {
-  const haystack = ` ${normalize(text)} `;
-
-  return aliases(value, type).some(alias => {
-    return haystack.includes(` ${normalize(alias)} `);
-  });
-}
-
-function resultText(item) {
-  return [
-    item.name,
-    item.title,
-    item.text,
-    item.snippet,
-    item.description,
-    item.url
-  ].filter(Boolean).join(" ");
-}
-
 function validUrl(value) {
   try {
     const u = new URL(value);
@@ -129,135 +57,39 @@ function validUrl(value) {
   }
 }
 
-/* सभी पाँच स्थानों का मिलान जरूरी */
-function exactVillageMatch(item, f) {
-  const text = resultText(item);
-
-  return (
-    containsLocation(text, f.state, "state") &&
-    containsLocation(text, f.district, "district") &&
-    containsLocation(text, f.tehsil, "tehsil") &&
-    containsLocation(text, f.block, "block") &&
-    containsLocation(text, f.village, "village")
-  );
-}
-
-function getFreshness(value) {
-  const map = {
-    today: "oneDay",
-    week: "oneWeek",
-    month: "oneMonth",
-    year: "oneYear",
-    all: "noLimit"
-  };
-
-  return map[value] || "noLimit";
-}
-
-function makeSearchQuery(f) {
-  return [
-    f.keyword,
-    f.category,
-    f.village,
-    f.block,
-    f.tehsil,
-    f.district,
-    f.state,
-    "government official scheme"
-  ].filter(Boolean).join(" ");
-}
-
-async function langSearch(query, freshness) {
-  if (!LANGSEARCH_API_KEY) {
-    throw new Error(
-      "LANGSEARCH_API_KEY Render में सेट नहीं है।"
-    );
-  }
-
-  const response = await fetch(
-    "https://api.langsearch.com/v1/web-search",
-    {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${LANGSEARCH_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        query,
-        count: 30,
-        freshness,
-        contents: {
-          text: {
-            max_characters: 3000
-          }
-        }
-      }),
-      signal: AbortSignal.timeout(30000)
-    }
-  );
-
-  const raw = await response.text();
-  let data;
-
+function officialSource(url) {
   try {
-    data = JSON.parse(raw);
+    const host = new URL(url).hostname.toLowerCase();
+    return (
+      host.endsWith(".gov.in") ||
+      host.endsWith(".nic.in") ||
+      host.endsWith(".gov") ||
+      host === "india.gov.in"
+    );
   } catch {
-    throw new Error("Search service से सही जवाब नहीं मिला।");
+    return false;
+  }
+}
+
+function requireAdmin(req, res, next) {
+  if (!ADMIN_KEY) {
+    return res.status(503).json({
+      ok: false,
+      message: "ADMIN_KEY Render में सेट नहीं है।"
+    });
   }
 
-  if (
-    !response.ok ||
-    (data.code && String(data.code) !== "200")
-  ) {
-    console.error(
-      "LangSearch error:",
-      response.status,
-      raw.slice(0, 500)
-    );
-
-    throw new Error(
-      data.message ||
-      data.error ||
-      `Search HTTP error ${response.status}`
-    );
+  if (req.headers["x-admin-key"] !== ADMIN_KEY) {
+    return res.status(401).json({
+      ok: false,
+      message: "Admin Key गलत है।"
+    });
   }
 
-  const results = data?.data?.webPages?.value || [];
-
-  return Array.isArray(results) ? results : [];
+  next();
 }
 
-function prepareResult(item) {
-  return {
-    title: clean(
-      item.name || item.title || "सरकारी जानकारी",
-      500
-    ),
-    description: clean(
-      item.text ||
-      item.snippet ||
-      item.description ||
-      "मूल सरकारी स्रोत खोलें।",
-      3000
-    ),
-    url: item.url,
-    date: item.datePublished || item.date || null
-  };
-}
-
-function uniqueResults(results) {
-  const seen = new Set();
-
-  return results.filter(item => {
-    const key = String(item.url || "").toLowerCase();
-
-    if (!key || seen.has(key)) return false;
-
-    seen.add(key);
-    return true;
-  });
-}
-
+/* Database */
 async function initDatabase() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS saved_schemes (
@@ -272,25 +104,36 @@ async function initDatabase() {
     )
   `);
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS villages (
+      id BIGSERIAL PRIMARY KEY,
+      lgd_code TEXT UNIQUE NOT NULL,
+      village_name TEXT NOT NULL,
+      gram_panchayat TEXT DEFAULT '',
+      block_name TEXT DEFAULT '',
+      subdistrict_name TEXT DEFAULT '',
+      district_name TEXT NOT NULL,
+      state_name TEXT NOT NULL,
+      state_code TEXT DEFAULT '',
+      district_code TEXT DEFAULT '',
+      block_code TEXT DEFAULT '',
+      subdistrict_code TEXT DEFAULT '',
+      source TEXT DEFAULT 'LGD CSV',
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS villages_location_idx
+    ON villages (state_name, district_name, village_name)
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS villages_name_idx
+    ON villages (LOWER(village_name))
+  `);
+
   console.log("Database initialized");
-}
-
-function requireAdmin(req, res, next) {
-  if (!ADMIN_KEY) {
-    return res.status(503).json({
-      ok: false,
-      message: "ADMIN_KEY सेट नहीं है।"
-    });
-  }
-
-  if (req.headers["x-admin-key"] !== ADMIN_KEY) {
-    return res.status(401).json({
-      ok: false,
-      message: "Admin Key गलत है।"
-    });
-  }
-
-  next();
 }
 
 /* Health */
@@ -298,14 +141,16 @@ app.get("/api/health", async (req, res) => {
   try {
     await pool.query("SELECT 1");
 
-    const count = await pool.query(
-      "SELECT COUNT(*)::int AS total FROM saved_schemes"
-    );
+    const [schemes, villages] = await Promise.all([
+      pool.query("SELECT COUNT(*)::int AS total FROM saved_schemes"),
+      pool.query("SELECT COUNT(*)::int AS total FROM villages")
+    ]);
 
     res.json({
       ok: true,
       database: "connected",
-      savedSchemes: count.rows[0].total,
+      savedSchemes: schemes.rows[0].total,
+      savedVillages: villages.rows[0].total,
       onlineSearchConfigured: Boolean(LANGSEARCH_API_KEY)
     });
   } catch (err) {
@@ -317,7 +162,345 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
-/* Strict village search */
+/* CSV parser: commas and quoted fields supported */
+function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let field = "";
+  let quoted = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+
+    if (ch === '"' && quoted && text[i + 1] === '"') {
+      field += '"';
+      i++;
+    } else if (ch === '"') {
+      quoted = !quoted;
+    } else if (ch === "," && !quoted) {
+      row.push(field.trim());
+      field = "";
+    } else if ((ch === "\n" || ch === "\r") && !quoted) {
+      if (ch === "\r" && text[i + 1] === "\n") i++;
+      row.push(field.trim());
+      if (row.some(Boolean)) rows.push(row);
+      row = [];
+      field = "";
+    } else {
+      field += ch;
+    }
+  }
+
+  row.push(field.trim());
+  if (row.some(Boolean)) rows.push(row);
+
+  return rows;
+}
+
+function headerIndex(headers, patterns) {
+  return headers.findIndex(h =>
+    patterns.some(p => h.includes(p))
+  );
+}
+
+/* Admin: import official LGD village CSV */
+app.post(
+  "/api/admin/villages/import",
+  requireAdmin,
+  async (req, res) => {
+    const csv = String(req.body.csv || "");
+
+    if (!csv || csv.length > 14 * 1024 * 1024) {
+      return res.status(400).json({
+        ok: false,
+        message: "CSV खाली है या 14 MB से बड़ी है।"
+      });
+    }
+
+    const rows = parseCSV(csv.replace(/^\uFEFF/, ""));
+
+    if (rows.length < 2) {
+      return res.status(400).json({
+        ok: false,
+        message: "CSV में हेडर और गाँवों का डेटा होना चाहिए।"
+      });
+    }
+
+    const headers = rows[0].map(normalize);
+
+    const col = {
+      village: headerIndex(headers, ["villagename", "village name"]),
+      lgd: headerIndex(headers, ["villagecode", "villagelgdcode", "lgdcode"]),
+      state: headerIndex(headers, ["statename"]),
+      district: headerIndex(headers, ["districtname"]),
+      block: headerIndex(headers, ["blockname", "developmentblock"]),
+      subdistrict: headerIndex(headers, ["subdistrictname", "tehsilname"]),
+      gp: headerIndex(headers, ["grampanchayatname", "villagepanchayatname"]),
+      stateCode: headerIndex(headers, ["statecode"]),
+      districtCode: headerIndex(headers, ["districtcode"]),
+      blockCode: headerIndex(headers, ["blockcode"]),
+      subdistrictCode: headerIndex(headers, ["subdistrictcode"])
+    };
+
+    const missing = [];
+    if (col.village < 0) missing.push("Village Name");
+    if (col.lgd < 0) missing.push("Village Code / LGD Code");
+    if (col.state < 0) missing.push("State Name");
+    if (col.district < 0) missing.push("District Name");
+
+    if (missing.length) {
+      return res.status(400).json({
+        ok: false,
+        message:
+          "CSV के कॉलम पहचाने नहीं गए: " + missing.join(", ") +
+          ". LGD Village CSV डाउनलोड करें।"
+      });
+    }
+
+    const get = (row, index) =>
+      index >= 0 ? clean(row[index], 200) : "";
+
+    let imported = 0;
+    let skipped = 0;
+
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      for (const row of rows.slice(1)) {
+        const village = get(row, col.village);
+        const lgd = get(row, col.lgd);
+        const state = get(row, col.state);
+        const district = get(row, col.district);
+
+        if (!village || !lgd || !state || !district) {
+          skipped++;
+          continue;
+        }
+
+        await client.query(
+          `INSERT INTO villages
+           (lgd_code, village_name, gram_panchayat,
+            block_name, subdistrict_name, district_name,
+            state_name, state_code, district_code,
+            block_code, subdistrict_code, source, updated_at)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'LGD CSV',NOW())
+           ON CONFLICT (lgd_code) DO UPDATE SET
+             village_name = EXCLUDED.village_name,
+             gram_panchayat = EXCLUDED.gram_panchayat,
+             block_name = EXCLUDED.block_name,
+             subdistrict_name = EXCLUDED.subdistrict_name,
+             district_name = EXCLUDED.district_name,
+             state_name = EXCLUDED.state_name,
+             state_code = EXCLUDED.state_code,
+             district_code = EXCLUDED.district_code,
+             block_code = EXCLUDED.block_code,
+             subdistrict_code = EXCLUDED.subdistrict_code,
+             source = 'LGD CSV',
+             updated_at = NOW()`,
+          [
+            lgd,
+            village,
+            get(row, col.gp),
+            get(row, col.block),
+            get(row, col.subdistrict),
+            district,
+            state,
+            get(row, col.stateCode),
+            get(row, col.districtCode),
+            get(row, col.blockCode),
+            get(row, col.subdistrictCode)
+          ]
+        );
+
+        imported++;
+      }
+
+      await client.query("COMMIT");
+
+      res.json({
+        ok: true,
+        imported,
+        skipped,
+        message: `${imported} गाँवों के रिकॉर्ड सेव हुए।`
+      });
+    } catch (err) {
+      await client.query("ROLLBACK");
+      console.error("Village import error:", err.message);
+      res.status(500).json({
+        ok: false,
+        message: "गाँवों का डेटा सेव नहीं हुआ।"
+      });
+    } finally {
+      client.release();
+    }
+  }
+);
+
+/* Village directory search */
+app.get("/api/villages", async (req, res) => {
+  try {
+    const q = clean(req.query.q, 100);
+    const state = clean(req.query.state, 100);
+    const district = clean(req.query.district, 100);
+
+    if (!q && !state && !district) {
+      return res.status(400).json({
+        ok: false,
+        message: "गाँव, जिला या राज्य का नाम दें।"
+      });
+    }
+
+    const result = await pool.query(
+      `SELECT lgd_code, village_name, gram_panchayat,
+              block_name, subdistrict_name,
+              district_name, state_name,
+              state_code, district_code
+       FROM villages
+       WHERE ($1 = '' OR village_name ILIKE '%' || $1 || '%'
+              OR gram_panchayat ILIKE '%' || $1 || '%')
+         AND ($2 = '' OR state_name ILIKE '%' || $2 || '%')
+         AND ($3 = '' OR district_name ILIKE '%' || $3 || '%')
+       ORDER BY
+         CASE WHEN LOWER(village_name) = LOWER($1) THEN 0 ELSE 1 END,
+         village_name
+       LIMIT 30`,
+      [q, state, district]
+    );
+
+    res.json({
+      ok: true,
+      count: result.rowCount,
+      results: result.rows,
+      note: "गाँव के सरकारी रिकॉर्ड LGD CSV आयात होने के बाद ही मिलेंगे।"
+    });
+  } catch (err) {
+    console.error("Village lookup error:", err.message);
+    res.status(500).json({
+      ok: false,
+      message: "गाँवों का रिकॉर्ड नहीं मिल सका।"
+    });
+  }
+});
+
+/* LangSearch */
+async function langSearch(query, freshness) {
+  if (!LANGSEARCH_API_KEY) {
+    throw new Error("LANGSEARCH_API_KEY सेट नहीं है।");
+  }
+
+  const response = await fetch(
+    "https://api.langsearch.com/v1/web-search",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LANGSEARCH_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        query,
+        count: 20,
+        freshness,
+        contents: {
+          text: { max_characters: 3000 }
+        }
+      }),
+      signal: AbortSignal.timeout(30000)
+    }
+  );
+
+  const raw = await response.text();
+  let data;
+
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    throw new Error("LangSearch से सही जवाब नहीं मिला।");
+  }
+
+  if (!response.ok || String(data.code) !== "200") {
+    console.error("LangSearch response:", response.status, raw.slice(0, 400));
+    throw new Error(
+      data.message || `LangSearch HTTP ${response.status}`
+    );
+  }
+
+  return Array.isArray(data?.data?.webPages?.value)
+    ? data.data.webPages.value
+    : [];
+}
+
+function freshness(value) {
+  return ({
+    today: "oneDay",
+    week: "oneWeek",
+    month: "oneMonth",
+    year: "oneYear",
+    all: "noLimit"
+  })[value] || "noLimit";
+}
+
+function resultText(item) {
+  return normalize([
+    item.name,
+    item.text,
+    item.snippet,
+    item.description,
+    item.url
+  ].filter(Boolean).join(" "));
+}
+
+function hasTerm(text, value) {
+  const term = normalize(value);
+  if (!term) return false;
+  return (` ${text} `).includes(` ${term} `);
+}
+
+function classifyResult(item, f) {
+  const text = resultText(item);
+
+  const villageMatch = hasTerm(text, f.village);
+  const blockMatch = hasTerm(text, f.block);
+  const tehsilMatch = hasTerm(text, f.tehsil);
+  const districtMatch = hasTerm(text, f.district);
+  const stateMatch = hasTerm(text, f.state);
+
+  if (villageMatch && districtMatch && stateMatch) return "village";
+  if ((blockMatch || tehsilMatch) && districtMatch && stateMatch) return "block";
+  if (districtMatch && stateMatch) return "district";
+  if (stateMatch) return "state";
+  return "other";
+}
+
+function prepareResult(item, f) {
+  const url = item.url;
+
+  return {
+    title: clean(item.name || "सरकारी जानकारी", 500),
+    description: clean(
+      item.text || item.snippet || item.description || "मूल स्रोत खोलें।",
+      2500
+    ),
+    url,
+    date: item.datePublished || item.date || "",
+    official: officialSource(url),
+    level: classifyResult(item, f)
+  };
+}
+
+function uniqueResults(items) {
+  const seen = new Set();
+
+  return items.filter(item => {
+    const key = String(item.url || "").toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+/* Multi-level scheme search */
 app.post("/api/search", async (req, res) => {
   try {
     const f = {
@@ -331,62 +514,86 @@ app.post("/api/search", async (req, res) => {
       dateRange: clean(req.body.dateRange, 20) || "all"
     };
 
-    const required = [
-      "state",
-      "district",
-      "tehsil",
-      "block",
-      "village"
+    if (!f.state || !f.district || !f.village) {
+      return res.status(400).json({
+        ok: false,
+        message: "राज्य, जिला और गाँव भरना जरूरी है।"
+      });
+    }
+
+    const topic = f.keyword || f.category || "सरकारी योजनाएँ";
+    const where = [f.village, f.block, f.tehsil, f.district, f.state]
+      .filter(Boolean);
+
+    const queries = [
+      `${topic} ${f.village} ${f.district} ${f.state} सरकारी योजना`,
+      `${topic} ${f.block} ${f.district} ${f.state} सरकारी योजना`,
+      `${topic} ${f.district} ${f.state} official government scheme`
     ];
 
-    if (required.some(key => !f[key])) {
-      return res.status(400).json({
-        ok: false,
-        message: "राज्य, जिला, तहसील, ब्लॉक और गाँव पाँचों भरें।"
-      });
-    }
+    console.log("Multi-level search:", queries);
 
-    if (!f.keyword && !f.category) {
-      return res.status(400).json({
-        ok: false,
-        message: "योजना का नाम या श्रेणी भरें।"
-      });
-    }
-
-    const query = makeSearchQuery(f);
-
-    console.log("Strict village search:", query);
-
-    const raw = await langSearch(
-      query,
-      getFreshness(f.dateRange)
+    const batches = await Promise.allSettled(
+      queries.map(q => langSearch(q, freshness(f.dateRange)))
     );
 
-    const exactResults = uniqueResults(
-      raw
+    const successful = batches
+      .filter(x => x.status === "fulfilled")
+      .flatMap(x => x.value);
+
+    const failed = batches.filter(x => x.status === "rejected");
+
+    if (!successful.length && failed.length) {
+      throw new Error(failed[0].reason.message || "वेब खोज विफल हुई।");
+    }
+
+    const all = uniqueResults(
+      successful
         .filter(item => item && validUrl(item.url))
-        .filter(item => exactVillageMatch(item, f))
-        .map(prepareResult)
+        .map(item => prepareResult(item, f))
     );
 
-    console.log("Search counts:", {
-      received: raw.length,
-      exactVillageMatched: exactResults.length
-    });
+    // Government sources are placed first, but other sources remain visible.
+    all.sort((a, b) => Number(b.official) - Number(a.official));
+
+    const villageResults = all.filter(x => x.level === "village");
+    const blockResults = all.filter(x => x.level === "block");
+    const districtResults = all.filter(x => x.level === "district");
+    const stateResults = all.filter(x => x.level === "state");
+    const otherResults = all.filter(x => x.level === "other");
+
+    // If a result mentions the village but not all other place names,
+    // keep it visible as a village-name match, not as verified implementation.
+    const villageNameResults = all.filter(x =>
+      hasTerm(resultText(x), f.village)
+    );
+
+    const officialCount = all.filter(x => x.official).length;
 
     res.json({
       ok: true,
       location: f,
-      exactResults,
-      regionalResults: [],
-      message: exactResults.length
-        ? "पाँचों स्थानों का मिलान करने वाले परिणाम मिले।"
-        : "आपके बताए गाँव का पूरा स्थान-मिलान नहीं मिला। दूसरे गाँव या जिले के परिणाम नहीं दिखाए गए।"
+      totals: {
+        allResults: all.length,
+        villageNameMatches: villageNameResults.length,
+        blockMatches: blockResults.length,
+        districtMatches: districtResults.length,
+        stateMatches: stateResults.length,
+        officialSources: officialCount
+      },
+      villageResults: villageNameResults,
+      blockResults,
+      districtResults,
+      stateResults,
+      otherResults,
+      message: all.length
+        ? "खोज पूरी हुई। परिणामों को स्थान के स्तर के अनुसार अलग दिखाया गया है।"
+        : "LangSearch से इस खोज के लिए कोई वेब परिणाम नहीं मिला।",
+      warning: "वेब पेज में गाँव का नाम मिलना इस बात का प्रमाण नहीं है कि योजना उस गाँव में लागू है। लागू होने की पुष्टि संबंधित सरकारी रिकॉर्ड से करें।",
+      searchErrors: failed.length
     });
-
   } catch (err) {
     console.error("Search error:", err.message);
-
     res.status(500).json({
       ok: false,
       message: err.message || "खोज में समस्या हुई।"
@@ -394,28 +601,38 @@ app.post("/api/search", async (req, res) => {
   }
 });
 
-/* Government beneficiary portals */
+/* Beneficiary portals */
 app.get("/api/beneficiary-portals", (req, res) => {
   res.json({
     ok: true,
     portals: [
       {
         title: "प्रधानमंत्री आवास योजना ग्रामीण",
-        description: "आवास योजना की सरकारी वेबसाइट और उपलब्ध रिपोर्ट।",
+        description: "ग्रामीण आवास योजना का आधिकारिक पोर्टल।",
         url: "https://pmayg.dord.gov.in/"
       },
       {
-        title: "मनरेगा जॉब कार्ड और श्रमिक जानकारी",
-        description: "उपलब्ध श्रमिक रिकॉर्ड सरकारी पोर्टल पर देखें।",
+        title: "मनरेगा श्रमिक जानकारी",
+        description: "उपलब्ध जॉब कार्ड और श्रमिक रिकॉर्ड देखें।",
         url: "https://mnregaweb4.nic.in/netnrega/workers/wrkinfo.aspx?lang=en"
       },
       {
         title: "मनरेगा आधिकारिक पोर्टल",
         description: "काम, मस्टर रोल और भुगतान संबंधी जानकारी।",
         url: "https://nrega.dord.gov.in/"
+      },
+      {
+        title: "राष्ट्रीय सरकारी सेवा पोर्टल",
+        description: "भारत सरकार की सेवाएँ और योजनाएँ।",
+        url: "https://www.india.gov.in/"
+      },
+      {
+        title: "LGD - गाँव और पंचायत निर्देशिका",
+        description: "गाँव, पंचायत और प्रशासनिक इकाइयों की सरकारी निर्देशिका।",
+        url: "https://lgdirectory.gov.in/"
       }
     ],
-    note: "लाभार्थी सूची सरकारी पोर्टल पर उपलब्ध होने पर ही देखी जा सकती है।"
+    note: "लाभार्थी की जानकारी तभी उपलब्ध होगी जब संबंधित सरकारी पोर्टल उसे सार्वजनिक करता हो।"
   });
 });
 
@@ -425,22 +642,16 @@ app.get("/api/saved", async (req, res) => {
     const result = await pool.query(
       "SELECT * FROM saved_schemes ORDER BY created_at DESC LIMIT 100"
     );
-
-    res.json({
-      ok: true,
-      results: result.rows
-    });
+    res.json({ ok: true, results: result.rows });
   } catch (err) {
-    console.error("Saved error:", err.message);
-
+    console.error("Saved schemes error:", err.message);
     res.status(500).json({
       ok: false,
-      message: "सेव किए गए रिकॉर्ड नहीं मिल सके।"
+      message: "सेव रिकॉर्ड नहीं मिल सके।"
     });
   }
 });
 
-/* Save scheme */
 app.post("/api/admin/schemes", requireAdmin, async (req, res) => {
   try {
     const title = clean(req.body.title, 500);
@@ -453,33 +664,20 @@ app.post("/api/admin/schemes", requireAdmin, async (req, res) => {
     if (!title || !validUrl(sourceUrl)) {
       return res.status(400).json({
         ok: false,
-        message: "योजना का नाम और सही स्रोत लिंक जरूरी है।"
+        message: "योजना का नाम और सही लिंक जरूरी है।"
       });
     }
 
     const result = await pool.query(
       `INSERT INTO saved_schemes
        (title, description, source_url, state, category, published_date)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING *`,
-      [
-        title,
-        description,
-        sourceUrl,
-        state,
-        category,
-        publishedDate
-      ]
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+      [title, description, sourceUrl, state, category, publishedDate]
     );
 
-    res.json({
-      ok: true,
-      record: result.rows[0]
-    });
-
+    res.json({ ok: true, record: result.rows[0] });
   } catch (err) {
     console.error("Save error:", err.message);
-
     res.status(500).json({
       ok: false,
       message: "जानकारी सेव नहीं हो सकी।"
@@ -487,61 +685,54 @@ app.post("/api/admin/schemes", requireAdmin, async (req, res) => {
   }
 });
 
-/* Delete scheme */
-app.delete("/api/admin/schemes/:id", requireAdmin, async (req, res) => {
-  try {
-    const id = Number(req.params.id);
+app.delete(
+  "/api/admin/schemes/:id",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const id = Number(req.params.id);
 
-    if (!Number.isInteger(id) || id < 1) {
-      return res.status(400).json({
+      if (!Number.isInteger(id) || id < 1) {
+        return res.status(400).json({
+          ok: false,
+          message: "गलत रिकॉर्ड ID।"
+        });
+      }
+
+      const result = await pool.query(
+        "DELETE FROM saved_schemes WHERE id=$1 RETURNING id",
+        [id]
+      );
+
+      if (!result.rowCount) {
+        return res.status(404).json({
+          ok: false,
+          message: "रिकॉर्ड नहीं मिला।"
+        });
+      }
+
+      res.json({ ok: true, message: "रिकॉर्ड डिलीट हो गया।" });
+    } catch (err) {
+      console.error("Delete error:", err.message);
+      res.status(500).json({
         ok: false,
-        message: "गलत रिकॉर्ड ID।"
+        message: "रिकॉर्ड डिलीट नहीं हुआ।"
       });
     }
-
-    const result = await pool.query(
-      "DELETE FROM saved_schemes WHERE id = $1 RETURNING id",
-      [id]
-    );
-
-    if (!result.rowCount) {
-      return res.status(404).json({
-        ok: false,
-        message: "रिकॉर्ड नहीं मिला।"
-      });
-    }
-
-    res.json({
-      ok: true,
-      message: "रिकॉर्ड डिलीट हो गया।"
-    });
-
-  } catch (err) {
-    console.error("Delete error:", err.message);
-
-    res.status(500).json({
-      ok: false,
-      message: "रिकॉर्ड डिलीट नहीं हुआ।"
-    });
   }
-});
+);
 
 /* Frontend */
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("*", (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "public", "index.html")
-  );
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 initDatabase()
   .then(() => {
     app.listen(PORT, () => {
-      console.log(
-        "Bharat Yojana Finder running on port",
-        PORT
-      );
+      console.log("Bharat Yojana Finder running on port", PORT);
     });
   })
   .catch(err => {
