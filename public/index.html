@@ -6,74 +6,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#075985">
 <title>भारत योजना खोजक</title>
-
 <style>
 :root {
-  --blue:#075985;
-  --blue2:#0e7490;
-  --bg:#f1f5f9;
-  --card:#fff;
-  --text:#172033;
-  --muted:#64748b;
+  --blue:#075985; --blue2:#0e7490; --bg:#f1f5f9;
+  --card:#fff; --text:#172033; --muted:#64748b;
   --border:#dbe3ed;
 }
 * { box-sizing:border-box; }
 body {
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  line-height:1.5;
+  margin:0; font-family:Arial,sans-serif;
+  background:var(--bg); color:var(--text); line-height:1.5;
 }
 header {
-  color:white;
-  padding:25px 15px;
-  text-align:center;
+  color:white; padding:24px 14px; text-align:center;
   background:linear-gradient(135deg,var(--blue),var(--blue2));
 }
-header h1 { margin:0 0 7px; font-size:25px; }
+header h1 { margin:0 0 6px; font-size:24px; }
 header p { margin:0; font-size:14px; }
-main { width:min(850px,100%); margin:auto; padding:14px; }
+main { width:min(900px,100%); margin:auto; padding:13px; }
 .card {
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:15px;
-  padding:16px;
-  margin-bottom:15px;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:14px; padding:15px; margin-bottom:14px;
   box-shadow:0 3px 12px #0f172a0b;
 }
 h2 { font-size:19px; margin:0 0 12px; }
 h3 { font-size:16px; margin:0 0 7px; }
-.grid {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:11px;
-}
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .field { margin-bottom:11px; }
-label {
-  display:block;
-  font-weight:bold;
-  font-size:13px;
-  margin-bottom:5px;
-}
+label { display:block; font-weight:bold; font-size:13px; margin-bottom:5px; }
 input,select,textarea {
-  width:100%;
-  padding:12px;
-  border:1px solid #cbd5e1;
-  border-radius:9px;
-  font-size:15px;
-  background:white;
-  color:#172033;
+  width:100%; padding:12px; border:1px solid #cbd5e1;
+  border-radius:9px; font-size:15px; background:white; color:#172033;
 }
 button {
-  border:0;
-  border-radius:9px;
-  padding:12px 16px;
-  background:var(--blue);
-  color:white;
-  font-weight:bold;
-  font-size:15px;
-  cursor:pointer;
+  border:0; border-radius:9px; padding:12px 15px;
+  background:var(--blue); color:white; font-weight:bold;
+  font-size:14px; cursor:pointer;
 }
 button:disabled { opacity:.6; }
 .secondary { background:#475569; }
@@ -81,136 +49,102 @@ button:disabled { opacity:.6; }
 .search-button { width:100%; margin-top:5px; }
 .muted { color:var(--muted); font-size:13px; }
 .notice {
-  border-radius:10px;
-  padding:12px;
-  margin:10px 0;
-  font-size:14px;
-  background:#eff6ff;
-  border:1px solid #bfdbfe;
-  color:#1e40af;
+  border-radius:10px; padding:12px; margin:10px 0;
+  font-size:14px; background:#eff6ff;
+  border:1px solid #bfdbfe; color:#1e40af;
 }
-.warning {
-  background:#fff7ed;
-  border-color:#fed7aa;
-  color:#9a3412;
-}
-.success {
-  background:#f0fdf4;
-  border-color:#bbf7d0;
-  color:#166534;
-}
-.error {
-  background:#fef2f2;
-  border-color:#fecaca;
-  color:#991b1b;
-}
+.warning { background:#fff7ed; border-color:#fed7aa; color:#9a3412; }
+.success { background:#f0fdf4; border-color:#bbf7d0; color:#166534; }
+.error { background:#fef2f2; border-color:#fecaca; color:#991b1b; }
 .result {
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:13px;
-  margin:10px 0;
-  background:white;
+  border:1px solid var(--border); border-radius:11px;
+  padding:12px; margin:9px 0; background:white;
 }
-.result p { margin:7px 0; font-size:14px; }
-.result a {
-  color:#0369a1;
-  font-weight:bold;
-  overflow-wrap:anywhere;
-}
+.result p { margin:7px 0; font-size:14px; overflow-wrap:anywhere; }
+.result a { color:#0369a1; font-weight:bold; overflow-wrap:anywhere; }
 .row {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  flex-wrap:wrap;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:9px; flex-wrap:wrap;
 }
+.stats {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:12px 0;
+}
+.stat {
+  background:#f8fafc; border:1px solid var(--border);
+  border-radius:10px; padding:11px; text-align:center;
+}
+.stat strong { display:block; font-size:23px; color:var(--blue); }
+.stat span { font-size:12px; color:var(--muted); }
 .hidden { display:none; }
-footer {
-  text-align:center;
-  color:var(--muted);
-  padding:15px;
-  font-size:12px;
-}
+footer { text-align:center; color:var(--muted); padding:15px; font-size:12px; }
 @media(max-width:520px) {
   .grid { grid-template-columns:1fr; gap:0; }
-  header h1 { font-size:22px; }
-  main { padding:10px; }
-  .card { padding:13px; }
+  .stats { grid-template-columns:repeat(2,1fr); }
+  header h1 { font-size:21px; }
+  main { padding:9px; }
+  .card { padding:12px; }
 }
 </style>
 </head>
-
 <body>
 
 <header>
   <h1>🇮🇳 भारत योजना खोजक</h1>
-  <p>अपने गाँव की सरकारी योजनाएँ और लाभार्थी जानकारी खोजें</p>
+  <p>भारत के गाँव, सरकारी योजनाएँ और सरकारी स्रोत खोजें</p>
 </header>
 
 <main>
 
 <section class="card">
-  <h2>📍 गाँव की जानकारी भरें</h2>
-
+  <h2>📍 गाँव और योजना खोजें</h2>
   <div class="notice">
-    पंडुवा ग्राम पंचायत के लिए स्थान पहले से भरा है।
-    दूसरे गाँव का गलत परिणाम नहीं दिखाया जाएगा।
+    गाँव का नाम, जिला और राज्य भरें। खोज गाँव, ब्लॉक, जिला और राज्य के स्तर पर अलग-अलग होगी।
   </div>
 
   <form id="searchForm">
-
     <div class="grid">
-
       <div class="field">
         <label for="state">राज्य *</label>
         <input id="state" required value="उत्तर प्रदेश">
       </div>
-
       <div class="field">
         <label for="district">जिला *</label>
         <input id="district" required value="प्रयागराज">
       </div>
-
       <div class="field">
-        <label for="tehsil">तहसील *</label>
-        <input id="tehsil" required value="बारा">
+        <label for="tehsil">तहसील</label>
+        <input id="tehsil" value="बारा">
       </div>
-
       <div class="field">
-        <label for="block">विकासखंड / ब्लॉक *</label>
-        <input id="block" required value="शंकरगढ़">
+        <label for="block">विकासखंड / ब्लॉक</label>
+        <input id="block" value="शंकरगढ़">
       </div>
-
       <div class="field">
         <label for="village">गाँव *</label>
         <input id="village" required value="पंडुवा">
       </div>
-
       <div class="field">
-        <label for="keyword">योजना का नाम *</label>
-        <input id="keyword" required placeholder="जैसे आवास योजना">
+        <label for="keyword">योजना या विषय</label>
+        <input id="keyword" placeholder="खाली छोड़ें तो सभी योजनाएँ खोजें">
       </div>
-
     </div>
 
     <div class="grid">
-
       <div class="field">
-        <label for="category">योजना की श्रेणी</label>
+        <label for="category">योजना श्रेणी</label>
         <select id="category">
           <option value="">सभी श्रेणियाँ</option>
-          <option value="किसान योजना">किसान योजना</option>
-          <option value="आवास योजना">आवास योजना</option>
-          <option value="पेंशन योजना">पेंशन योजना</option>
-          <option value="छात्रवृत्ति">छात्रवृत्ति</option>
-          <option value="रोजगार योजना">रोजगार योजना</option>
-          <option value="महिला कल्याण">महिला कल्याण</option>
-          <option value="राशन योजना">राशन योजना</option>
-          <option value="स्वास्थ्य योजना">स्वास्थ्य योजना</option>
-          <option value="पशुपालन और डेयरी">पशुपालन और डेयरी</option>
+          <option>किसान योजना</option>
+          <option>आवास योजना</option>
+          <option>पेंशन योजना</option>
+          <option>छात्रवृत्ति</option>
+          <option>रोजगार योजना</option>
+          <option>महिला कल्याण</option>
+          <option>राशन योजना</option>
+          <option>स्वास्थ्य योजना</option>
+          <option>पशुपालन और डेयरी</option>
         </select>
       </div>
-
       <div class="field">
         <label for="dateRange">समय सीमा</label>
         <select id="dateRange">
@@ -221,174 +155,207 @@ footer {
           <option value="year">पिछले 12 महीने</option>
         </select>
       </div>
-
     </div>
 
-    <button class="search-button" id="searchBtn">
-      🔎 गाँव की योजनाएँ खोजें
-    </button>
-
+    <button class="search-button" id="searchBtn">🔎 योजनाएँ खोजें</button>
   </form>
-
   <div id="searchMessage" aria-live="polite"></div>
 </section>
 
-<section id="exactSection" class="card hidden">
-  <h2>✅ गाँव से मिलान वाले परिणाम</h2>
-  <p class="muted">
-    पाँचों स्थानों का मिलान हुआ है। सरकारी स्रोत पर जानकारी जाँचें।
-  </p>
-  <div id="exactResults"></div>
+<section class="card">
+  <h2>🏡 गाँव का सरकारी रिकॉर्ड</h2>
+  <p class="muted">LGD सूची डेटाबेस में आयात होने के बाद गाँव का LGD कोड और प्रशासनिक जानकारी यहाँ दिखेगी।</p>
+  <button type="button" id="villageLookupBtn">गाँव का रिकॉर्ड देखें</button>
+  <div id="villageRecords"></div>
+</section>
+
+<section id="summarySection" class="card hidden">
+  <h2>📊 खोज का सारांश</h2>
+  <div class="stats">
+    <div class="stat"><strong id="totalCount">0</strong><span>कुल वेब परिणाम</span></div>
+    <div class="stat"><strong id="villageCount">0</strong><span>गाँव नाम वाले परिणाम</span></div>
+    <div class="stat"><strong id="blockCount">0</strong><span>ब्लॉक / तहसील परिणाम</span></div>
+    <div class="stat"><strong id="districtCount">0</strong><span>जिला परिणाम</span></div>
+    <div class="stat"><strong id="stateCount">0</strong><span>राज्य परिणाम</span></div>
+    <div class="stat"><strong id="officialCount">0</strong><span>सरकारी डोमेन स्रोत</span></div>
+  </div>
+  <div class="notice warning" id="searchWarning"></div>
+</section>
+
+<section id="villageSection" class="card hidden">
+  <h2>🏡 गाँव के नाम वाले परिणाम</h2>
+  <div id="villageResults"></div>
+</section>
+
+<section id="blockSection" class="card hidden">
+  <h2>🏘️ ब्लॉक और तहसील के परिणाम</h2>
+  <div id="blockResults"></div>
+</section>
+
+<section id="districtSection" class="card hidden">
+  <h2>📍 जिला स्तर के परिणाम</h2>
+  <div id="districtResults"></div>
+</section>
+
+<section id="stateSection" class="card hidden">
+  <h2>🇮🇳 राज्य स्तर के परिणाम</h2>
+  <div id="stateResults"></div>
+</section>
+
+<section id="otherSection" class="card hidden">
+  <h2>🌐 अन्य वेब परिणाम</h2>
+  <div id="otherResults"></div>
 </section>
 
 <section id="noResults" class="card hidden">
-  <h2>कोई प्रमाणित गाँव-विशिष्ट परिणाम नहीं मिला</h2>
+  <h2>कोई वेब परिणाम नहीं मिला</h2>
   <p>
-    दूसरे गाँव या जिले के परिणाम नहीं दिखाए गए।
     इसका अर्थ यह नहीं है कि आपके गाँव में योजना लागू नहीं है।
-    हो सकता है कि सरकारी वेबसाइट पर गाँव का नाम प्रकाशित न हो।
+    हो सकता है कि सरकारी वेबसाइट पर गाँव का नाम प्रकाशित न हो या सर्च इंजन को वह पेज न मिला हो।
   </p>
 </section>
 
 <section class="card">
-  <h2>👨‍👩‍👧‍👦 लाभार्थी सूची</h2>
-
+  <h2>👨‍👩‍👧‍👦 लाभार्थी और सरकारी पोर्टल</h2>
   <div class="notice warning">
-    लाभार्थियों के नाम केवल सरकारी रिकॉर्ड से ही दिखाए जाएँगे।
-    नीचे सरकारी पोर्टल खोलकर अपना जिला, ब्लॉक और ग्राम पंचायत चुनें।
+    लाभार्थियों के नाम और योजना का लाभ केवल संबंधित सरकारी रिकॉर्ड से ही सत्यापित करें।
   </div>
-
-  <div id="beneficiaryLinks">
-    लोड हो रहा है...
-  </div>
+  <div id="beneficiaryLinks">लोड हो रहा है...</div>
 </section>
 
 <section class="card">
   <div class="row">
     <h2>📚 सेव की गई योजनाएँ</h2>
-    <button type="button" class="secondary" id="loadSavedBtn">
-      रिफ्रेश
-    </button>
+    <button type="button" class="secondary" id="loadSavedBtn">रिफ्रेश</button>
   </div>
-
-  <div id="savedResults" class="muted">
-    लोड हो रहा है...
-  </div>
+  <div id="savedResults" class="muted">लोड हो रहा है...</div>
 </section>
 
 <section class="card">
   <h2>🔐 एडमिन पैनल</h2>
-
-  <p class="muted">
-    सत्यापित सरकारी योजना का रिकॉर्ड यहाँ सेव करें।
-  </p>
+  <div class="notice">
+    यहाँ सरकारी LGD गाँव CSV अपलोड करें। इससे गाँवों के नाम और LGD कोड डेटाबेस में सेव होंगे।
+  </div>
 
   <div class="field">
     <label for="adminKey">Admin Key</label>
     <input id="adminKey" type="password" autocomplete="off">
   </div>
 
+  <h3>गाँवों का LGD CSV आयात</h3>
+  <p class="muted">
+    LGD पोर्टल से Village CSV डाउनलोड करके यहाँ चुनें।
+    CSV में Village Name, Village Code, State Name और District Name कॉलम जरूरी हैं।
+  </p>
+  <div class="field">
+    <label for="villageCsv">LGD Village CSV फाइल</label>
+    <input id="villageCsv" type="file" accept=".csv,text/csv">
+  </div>
+  <button type="button" id="importVillagesBtn">गाँवों का रिकॉर्ड आयात करें</button>
+  <div id="importMessage"></div>
+
+  <hr style="border:0;border-top:1px solid #dbe3ed;margin:18px 0">
+
+  <h3>योजना का रिकॉर्ड सेव करें</h3>
   <div class="field">
     <label for="saveTitle">योजना का नाम</label>
     <input id="saveTitle">
   </div>
-
   <div class="field">
     <label for="saveDescription">जानकारी</label>
     <textarea id="saveDescription" rows="3"></textarea>
   </div>
-
   <div class="field">
     <label for="saveUrl">सरकारी स्रोत लिंक</label>
     <input id="saveUrl" type="url" placeholder="https://...">
   </div>
-
   <div class="grid">
     <div class="field">
       <label for="saveState">राज्य</label>
       <input id="saveState" value="उत्तर प्रदेश">
     </div>
-
     <div class="field">
       <label for="saveCategory">श्रेणी</label>
       <input id="saveCategory">
     </div>
   </div>
-
   <div class="field">
     <label for="saveDate">प्रकाशित तारीख</label>
-    <input id="saveDate" placeholder="2026-11-14">
+    <input id="saveDate" type="date">
   </div>
-
-  <button type="button" id="saveBtn">
-    योजना सेव करें
-  </button>
-
+  <button type="button" id="saveBtn">योजना सेव करें</button>
   <div id="adminMessage"></div>
 </section>
 
 </main>
 
 <footer>
-  Bharat Yojana Finder · सरकारी रिकॉर्ड की पुष्टि संबंधित सरकारी पोर्टल से करें।
+  Bharat Yojana Finder · जानकारी की अंतिम पुष्टि संबंधित सरकारी पोर्टल से करें।
 </footer>
 
 <script>
-
 const $ = id => document.getElementById(id);
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, ch => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#039;"
+    "&":"&amp;", "<":"&lt;", ">":"&gt;",
+    '"':"&quot;", "'":"&#039;"
   }[ch]));
 }
 
-function showMessage(id, message, type = "notice") {
+function message(id, text, type = "notice") {
   $(id).innerHTML =
-    `<div class="notice ${type}">${escapeHtml(message)}</div>`;
+    `<div class="notice ${type}">${escapeHtml(text)}</div>`;
 }
 
-function renderResults(targetId, results) {
+function renderResults(id, results) {
   if (!Array.isArray(results) || !results.length) {
-    $(targetId).innerHTML =
-      "<p class='muted'>कोई परिणाम नहीं मिला।</p>";
+    $(id).innerHTML = "<p class='muted'>इस स्तर पर कोई परिणाम नहीं मिला।</p>";
     return;
   }
 
-  $(targetId).innerHTML = results.map(item => `
+  $(id).innerHTML = results.map(item => `
     <article class="result">
-      <h3>${escapeHtml(item.title)}</h3>
+      <div class="row">
+        <h3>${escapeHtml(item.title)}</h3>
+        <span class="muted">${item.official ? "सरकारी डोमेन" : "अन्य स्रोत"}</span>
+      </div>
       <p>${escapeHtml(item.description)}</p>
-
-      ${item.date
-        ? `<p class="muted">तारीख: ${escapeHtml(item.date)}</p>`
-        : ""
-      }
-
-      <a href="${escapeHtml(item.url)}"
-         target="_blank"
-         rel="noopener noreferrer">
-         मूल सरकारी स्रोत खोलें ↗
+      ${item.date ? `<p class="muted">प्रकाशित तारीख: ${escapeHtml(item.date)}</p>` : ""}
+      <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">
+        मूल वेबसाइट खोलें ↗
       </a>
     </article>
   `).join("");
 }
 
+function showSection(sectionId, resultId, results) {
+  if (Array.isArray(results) && results.length) {
+    $(sectionId).classList.remove("hidden");
+    renderResults(resultId, results);
+  } else {
+    $(sectionId).classList.add("hidden");
+    $(resultId).innerHTML = "";
+  }
+}
+
 /* Search */
 async function searchSchemes(event) {
-  event.preventDefault();
+  if (event) event.preventDefault();
 
   const button = $("searchBtn");
   button.disabled = true;
   button.textContent = "खोज जारी है...";
 
+  [
+    "searchMessage", "summarySection", "villageSection",
+    "blockSection", "districtSection", "stateSection",
+    "otherSection", "noResults"
+  ].forEach(id => {
+    if ($(id)) $(id).classList.add("hidden");
+  });
+
   $("searchMessage").innerHTML = "";
-  $("exactSection").classList.add("hidden");
-  $("noResults").classList.add("hidden");
 
   const body = {
     state: $("state").value.trim(),
@@ -404,9 +371,7 @@ async function searchSchemes(event) {
   try {
     const response = await fetch("/api/search", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body)
     });
 
@@ -416,30 +381,89 @@ async function searchSchemes(event) {
       throw new Error(data.message || "खोज पूरी नहीं हुई।");
     }
 
-    showMessage(
-      "searchMessage",
-      data.message,
-      "success"
-    );
+    message("searchMessage", data.message || "खोज पूरी हुई।", "success");
 
-    const exact = data.exactResults || [];
+    const totals = data.totals || {};
+    $("totalCount").textContent = totals.allResults || 0;
+    $("villageCount").textContent = totals.villageNameMatches || 0;
+    $("blockCount").textContent = totals.blockMatches || 0;
+    $("districtCount").textContent = totals.districtMatches || 0;
+    $("stateCount").textContent = totals.stateMatches || 0;
+    $("officialCount").textContent = totals.officialSources || 0;
+    $("searchWarning").textContent = data.warning || "";
 
-    if (exact.length) {
-      $("exactSection").classList.remove("hidden");
-      renderResults("exactResults", exact);
-    } else {
+    $("summarySection").classList.remove("hidden");
+
+    showSection("villageSection", "villageResults", data.villageResults);
+    showSection("blockSection", "blockResults", data.blockResults);
+    showSection("districtSection", "districtResults", data.districtResults);
+    showSection("stateSection", "stateResults", data.stateResults);
+    showSection("otherSection", "otherResults", data.otherResults);
+
+    if (!totals.allResults) {
       $("noResults").classList.remove("hidden");
     }
-
-  } catch (error) {
-    showMessage(
-      "searchMessage",
-      error.message || "सर्वर में समस्या हुई।",
-      "error"
-    );
+  } catch (err) {
+    message("searchMessage", err.message || "सर्वर में समस्या हुई।", "error");
   } finally {
     button.disabled = false;
-    button.textContent = "🔎 गाँव की योजनाएँ खोजें";
+    button.textContent = "🔎 योजनाएँ खोजें";
+  }
+}
+
+/* Village database lookup */
+async function lookupVillage() {
+  const button = $("villageLookupBtn");
+  button.disabled = true;
+  button.textContent = "रिकॉर्ड खोज रहे हैं...";
+  $("villageRecords").innerHTML = "";
+
+  try {
+    const params = new URLSearchParams({
+      q: $("village").value.trim(),
+      state: $("state").value.trim(),
+      district: $("district").value.trim()
+    });
+
+    const response = await fetch("/api/villages?" + params);
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.message || "रिकॉर्ड नहीं मिला।");
+    }
+
+    if (!data.results.length) {
+      $("villageRecords").innerHTML =
+        `<div class="notice warning">
+          इस गाँव का LGD रिकॉर्ड अभी डेटाबेस में नहीं मिला।
+          एडमिन पैनल से सरकारी LGD Village CSV आयात करें।
+        </div>`;
+      return;
+    }
+
+    $("villageRecords").innerHTML = data.results.map(v => `
+      <article class="result">
+        <h3>${escapeHtml(v.village_name)}</h3>
+        <p>LGD गाँव कोड: <strong>${escapeHtml(v.lgd_code)}</strong></p>
+        <p>ग्राम पंचायत: ${escapeHtml(v.gram_panchayat || "उपलब्ध नहीं")}</p>
+        <p>ब्लॉक: ${escapeHtml(v.block_name || "उपलब्ध नहीं")}</p>
+        <p>तहसील: ${escapeHtml(v.subdistrict_name || "उपलब्ध नहीं")}</p>
+        <p>जिला: ${escapeHtml(v.district_name)}</p>
+        <p>राज्य: ${escapeHtml(v.state_name)}</p>
+        <button type="button" data-use-village="${escapeHtml(v.lgd_code)}">
+          इस गाँव का स्थान चुनें
+        </button>
+      </article>
+    `).join("");
+
+    $("villageRecords").dataset.records =
+      JSON.stringify(data.results);
+  } catch (err) {
+    $("villageRecords").innerHTML =
+      `<div class="notice error">${escapeHtml(err.message)}</div>`;
+  } finally {
+    button.disabled = false;
+    button.textContent = "गाँव का रिकॉर्ड देखें";
   }
 }
 
@@ -449,26 +473,19 @@ async function loadBeneficiaryPortals() {
     const response = await fetch("/api/beneficiary-portals");
     const data = await response.json();
 
-    if (!response.ok || !data.ok) {
-      throw new Error("पोर्टल लोड नहीं हुए।");
-    }
+    if (!response.ok || !data.ok) throw new Error("पोर्टल लोड नहीं हुए।");
 
-    $("beneficiaryLinks").innerHTML =
-      data.portals.map(item => `
-        <article class="result">
-          <h3>${escapeHtml(item.title)}</h3>
-          <p>${escapeHtml(item.description)}</p>
-          <a href="${escapeHtml(item.url)}"
-             target="_blank"
-             rel="noopener noreferrer">
-             सरकारी पोर्टल खोलें ↗
-          </a>
-        </article>
-      `).join("") +
-      `<p class="muted">${escapeHtml(data.note)}</p>`;
-
-  } catch (error) {
-    $("beneficiaryLinks").textContent = error.message;
+    $("beneficiaryLinks").innerHTML = data.portals.map(item => `
+      <article class="result">
+        <h3>${escapeHtml(item.title)}</h3>
+        <p>${escapeHtml(item.description)}</p>
+        <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">
+          सरकारी पोर्टल खोलें ↗
+        </a>
+      </article>
+    `).join("") + `<p class="muted">${escapeHtml(data.note)}</p>`;
+  } catch (err) {
+    $("beneficiaryLinks").textContent = err.message;
   }
 }
 
@@ -480,57 +497,94 @@ async function loadSaved() {
     const response = await fetch("/api/saved");
     const data = await response.json();
 
-    if (!response.ok || !data.ok) {
-      throw new Error("रिकॉर्ड नहीं मिले।");
-    }
+    if (!response.ok || !data.ok) throw new Error("रिकॉर्ड नहीं मिले।");
 
-    const rows = data.results || [];
-
-    if (!rows.length) {
-      $("savedResults").innerHTML =
-        "<p>अभी कोई योजना सेव नहीं है।</p>";
+    if (!data.results.length) {
+      $("savedResults").innerHTML = "<p>अभी कोई योजना सेव नहीं है।</p>";
       return;
     }
 
-    $("savedResults").innerHTML = rows.map(item => `
+    $("savedResults").innerHTML = data.results.map(item => `
       <article class="result">
         <h3>${escapeHtml(item.title)}</h3>
         <p>${escapeHtml(item.description || "")}</p>
-
-        <p class="muted">
-          ${escapeHtml(item.state || "")}
-          ·
-          ${escapeHtml(item.category || "")}
-        </p>
-
-        <a href="${escapeHtml(item.source_url)}"
-           target="_blank"
-           rel="noopener noreferrer">
-           स्रोत खोलें ↗
+        <p class="muted">${escapeHtml(item.state || "")} · ${escapeHtml(item.category || "")}</p>
+        <a href="${escapeHtml(item.source_url)}" target="_blank" rel="noopener noreferrer">
+          स्रोत खोलें ↗
         </a>
-
         <div class="row" style="margin-top:9px">
           <span class="muted">रिकॉर्ड #${Number(item.id)}</span>
-          <button type="button"
-                  class="danger"
-                  data-delete-id="${Number(item.id)}">
-            डिलीट
-          </button>
+          <button type="button" class="danger" data-delete-id="${Number(item.id)}">डिलीट</button>
         </div>
       </article>
     `).join("");
-
-  } catch (error) {
-    $("savedResults").textContent = error.message;
+  } catch (err) {
+    $("savedResults").textContent = err.message;
   }
 }
 
-/* Save */
+/* Import LGD CSV */
+async function importVillages() {
+  const key = $("adminKey").value.trim();
+  const file = $("villageCsv").files[0];
+
+  if (!key) {
+    message("importMessage", "पहले Admin Key भरें।", "error");
+    return;
+  }
+  if (!file) {
+    message("importMessage", "पहले LGD CSV फाइल चुनें।", "error");
+    return;
+  }
+  if (file.size > 14 * 1024 * 1024) {
+    message("importMessage", "CSV फाइल 14 MB से छोटी रखें।", "error");
+    return;
+  }
+
+  const button = $("importVillagesBtn");
+  button.disabled = true;
+  button.textContent = "गाँवों का रिकॉर्ड आयात हो रहा है...";
+
+  try {
+    const csv = await file.text();
+
+    const response = await fetch("/api/admin/villages/import", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-key": key
+      },
+      body: JSON.stringify({ csv })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.message || "CSV आयात नहीं हुई।");
+    }
+
+    message(
+      "importMessage",
+      `${data.message} छोड़ी गई पंक्तियाँ: ${data.skipped}`,
+      "success"
+    );
+
+    $("villageCsv").value = "";
+    await lookupVillage();
+  } catch (err) {
+    message("importMessage", err.message, "error");
+  } finally {
+    button.disabled = false;
+    button.textContent = "गाँवों का रिकॉर्ड आयात करें";
+  }
+}
+
+/* Save scheme */
 async function saveScheme() {
   const key = $("adminKey").value.trim();
 
   if (!key) {
-    showMessage("adminMessage", "पहले Admin Key भरें।", "error");
+    message("adminMessage", "पहले Admin Key भरें।", "error");
     return;
   }
 
@@ -554,96 +608,85 @@ async function saveScheme() {
     });
 
     const data = await response.json();
-
     if (!response.ok || !data.ok) {
       throw new Error(data.message || "सेव नहीं हुआ।");
     }
 
-    showMessage(
-      "adminMessage",
-      "योजना सफलतापूर्वक सेव हो गई।",
-      "success"
-    );
-
+    message("adminMessage", "योजना सेव हो गई।", "success");
     $("saveTitle").value = "";
     $("saveDescription").value = "";
     $("saveUrl").value = "";
     $("saveDate").value = "";
-
     await loadSaved();
-
-  } catch (error) {
-    showMessage("adminMessage", error.message, "error");
+  } catch (err) {
+    message("adminMessage", err.message, "error");
   }
 }
 
-/* Delete */
+/* Delete scheme */
 async function deleteScheme(id) {
   const key = $("adminKey").value.trim();
 
   if (!key) {
-    showMessage(
-      "adminMessage",
-      "डिलीट करने के लिए Admin Key भरें।",
-      "error"
-    );
+    message("adminMessage", "डिलीट करने के लिए Admin Key भरें।", "error");
     return;
   }
-
-  if (!confirm("क्या यह रिकॉर्ड डिलीट करना चाहते हैं?")) {
-    return;
-  }
+  if (!confirm("क्या यह रिकॉर्ड डिलीट करना चाहते हैं?")) return;
 
   try {
     const response = await fetch(
       `/api/admin/schemes/${encodeURIComponent(id)}`,
       {
         method: "DELETE",
-        headers: {
-          "x-admin-key": key
-        }
+        headers: { "x-admin-key": key }
       }
     );
 
     const data = await response.json();
-
     if (!response.ok || !data.ok) {
       throw new Error(data.message || "डिलीट नहीं हुआ।");
     }
 
-    showMessage(
-      "adminMessage",
-      "रिकॉर्ड डिलीट हो गया।",
-      "success"
-    );
-
+    message("adminMessage", "रिकॉर्ड डिलीट हो गया।", "success");
     await loadSaved();
-
-  } catch (error) {
-    showMessage("adminMessage", error.message, "error");
+  } catch (err) {
+    message("adminMessage", err.message, "error");
   }
 }
 
 /* Events */
 $("searchForm").addEventListener("submit", searchSchemes);
-
+$("villageLookupBtn").addEventListener("click", lookupVillage);
 $("loadSavedBtn").addEventListener("click", loadSaved);
-
 $("saveBtn").addEventListener("click", saveScheme);
+$("importVillagesBtn").addEventListener("click", importVillages);
 
 $("savedResults").addEventListener("click", event => {
-  const button = event.target.closest("[data-delete-id]");
+  const btn = event.target.closest("[data-delete-id]");
+  if (btn) deleteScheme(btn.dataset.deleteId);
+});
 
-  if (button) {
-    deleteScheme(button.dataset.deleteId);
-  }
+$("villageRecords").addEventListener("click", event => {
+  const btn = event.target.closest("[data-use-village]");
+  if (!btn) return;
+
+  const records = JSON.parse($("villageRecords").dataset.records || "[]");
+  const village = records.find(v => v.lgd_code === btn.dataset.useVillage);
+  if (!village) return;
+
+  $("village").value = village.village_name;
+  $("state").value = village.state_name;
+  $("district").value = village.district_name;
+  if (village.block_name) $("block").value = village.block_name;
+  if (village.subdistrict_name) $("tehsil").value = village.subdistrict_name;
+
+  message("searchMessage", "गाँव का सरकारी रिकॉर्ड चुन लिया गया है। अब योजना खोजें।", "success");
+  window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
 /* Start */
 loadSaved();
 loadBeneficiaryPortals();
-
 </script>
-
 </body>
 </html>
