@@ -5,411 +5,470 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#075e54">
-<title>भारत योजना खोजक</title>
+<title>भारत योजना खोजक | पंडुवा-भिलोर</title>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9;color:#172033}
-header{background:linear-gradient(135deg,#075e54,#1677c8);color:white;padding:28px 15px;text-align:center}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f1f5f9;
+  color:#172033;
+}
+header{
+  background:linear-gradient(135deg,#075e54,#1677c8);
+  color:white;
+  padding:28px 15px;
+  text-align:center;
+}
 header h1{margin:0 0 8px;font-size:25px}
-header p{margin:0;font-size:14px}
+header p{margin:0;font-size:14px;line-height:1.6}
 main{max-width:760px;margin:18px auto;padding:0 12px}
-.card{background:white;border-radius:15px;padding:17px;margin-bottom:15px;box-shadow:0 3px 14px #0000000d}
+.card{
+  background:white;
+  border-radius:15px;
+  padding:17px;
+  margin-bottom:15px;
+  box-shadow:0 3px 14px #0000000d;
+}
 h2{font-size:19px;margin:0 0 13px;color:#075e54}
-label{display:block;font-weight:bold;font-size:14px;margin:12px 0 6px}
-select,input{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:9px;background:white;font-size:16px}
-button{border:0;border-radius:9px;padding:13px;background:#087b65;color:white;font-size:16px;font-weight:bold;width:100%;margin-top:14px}
+h3{font-size:16px;color:#075e54}
+label{
+  display:block;
+  font-weight:bold;
+  font-size:14px;
+  margin:12px 0 6px;
+}
+select,input{
+  width:100%;
+  padding:13px;
+  border:1px solid #cbd5e1;
+  border-radius:9px;
+  background:white;
+  font-size:16px;
+}
+button{
+  border:0;
+  border-radius:9px;
+  padding:13px;
+  background:#087b65;
+  color:white;
+  font-size:15px;
+  font-weight:bold;
+  width:100%;
+  margin-top:12px;
+  cursor:pointer;
+}
 button:disabled{opacity:.5}
-.small{font-size:12px;color:#64748b;line-height:1.6}
-.status{padding:11px;background:#eff6ff;border-radius:8px;margin-top:12px;font-size:13px;line-height:1.5}
-.result{border:1px solid #e2e8f0;padding:13px;border-radius:10px;margin-top:12px}
-.result h3{font-size:16px;margin:0 0 8px;color:#075e54}
-.result p{font-size:13px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.secondary{background:#2563eb}
+.light{background:#e2e8f0;color:#172033}
+.small{
+  font-size:12px;
+  color:#64748b;
+  line-height:1.7;
+}
+.status{
+  padding:12px;
+  background:#eff6ff;
+  border-radius:9px;
+  margin-top:12px;
+  font-size:13px;
+  line-height:1.6;
+}
+.warning{
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  color:#9a3412;
+  padding:12px;
+  border-radius:9px;
+  font-size:13px;
+  line-height:1.6;
+  margin:12px 0;
+}
+.result{
+  border:1px solid #e2e8f0;
+  padding:13px;
+  border-radius:10px;
+  margin-top:12px;
+  overflow-wrap:anywhere;
+}
+.result h3{margin:0 0 8px}
+.result p{font-size:13px;line-height:1.6;white-space:pre-wrap}
 a{color:#075eaa;overflow-wrap:anywhere}
-.tag{display:inline-block;background:#e0f2fe;color:#075985;padding:4px 8px;border-radius:20px;font-size:11px;margin-bottom:7px}
-footer{text-align:center;padding:20px;font-size:12px;color:#64748b}
+.tag{
+  display:inline-block;
+  background:#e0f2fe;
+  color:#075985;
+  padding:4px 8px;
+  border-radius:20px;
+  font-size:11px;
+  margin-bottom:7px;
+}
+.stat{
+  background:#f0fdf4;
+  border:1px solid #bbf7d0;
+  border-radius:10px;
+  padding:13px;
+  margin-top:10px;
+}
+.stat strong{color:#166534}
+footer{
+  text-align:center;
+  padding:20px;
+  font-size:12px;
+  color:#64748b;
+}
 </style>
 </head>
+
 <body>
 
 <header>
   <h1>🇮🇳 भारत योजना खोजक</h1>
-  <p>अपने गाँव की सरकारी योजनाओं की जानकारी खोजें</p>
+  <p>ग्राम पंचायत पंडुवा-भिलोर</p>
+  <p>बारा, प्रयागराज, उत्तर प्रदेश</p>
 </header>
 
 <main>
 
 <section class="card">
-  <h2>📍 अपना गाँव चुनें</h2>
+  <h2>📍 अपना क्षेत्र चुनें</h2>
 
-  <label>राज्य</label>
-  <select id="state">
-    <option value="">राज्य चुनें</option>
+  <label>गाँव / ग्राम पंचायत</label>
+  <select id="village">
+    <option value="">अपना क्षेत्र चुनें</option>
+    <option value="panduwa">पंडुवा (Panduwa) गाँव</option>
+    <option value="bhilore">भिलोर (Bhilore) गाँव</option>
+    <option value="panchayat">पूरी ग्राम पंचायत — पंडुवा और भिलोर</option>
   </select>
 
-  <label>जिला</label>
-  <select id="district" disabled>
-    <option value="">पहले राज्य चुनें</option>
-  </select>
+  <div class="status">
+    <b>क्षेत्र:</b> बारा, प्रयागराज, उत्तर प्रदेश<br>
+    <b>पिन कोड:</b> 212107<br>
+    <b>गाँव:</b> पंडुवा और भिलोर
+  </div>
 
-  <label>तहसील / उप-जिला</label>
-  <select id="tehsil" disabled>
-    <option value="">पहले जिला चुनें</option>
-  </select>
-
-  <label>विकास खंड / ब्लॉक</label>
-  <select id="block" disabled>
-    <option value="">ब्लॉक चुनें</option>
-  </select>
-
-  <label>गाँव का नाम</label>
-  <input id="village" placeholder="जैसे: Panduwa / पंडुवा">
-
-  <label>किस योजना की जानकारी चाहिए?</label>
-  <input id="keyword" placeholder="खाली छोड़ने पर सभी विषय खोजें">
+  <label>योजना का नाम (वैकल्पिक)</label>
+  <input id="keyword" placeholder="जैसे: आवास, पेंशन, मनरेगा">
 
   <button id="searchBtn" onclick="searchSchemes()">
-    🔎 गाँव की योजनाएँ खोजें
+    🔎 सरकारी योजना की जानकारी खोजें
   </button>
 
   <div id="message" class="status">
-    स्थानों की सूची लोड हो रही है...
+    अपना गाँव चुनकर खोज शुरू करें।
   </div>
+</section>
+
+<section class="card">
+  <h2>📊 सरकारी डेटा रिपोर्ट</h2>
+
+  <div id="report">
+    <p class="small">गाँव या ग्राम पंचायत चुनने के बाद रिपोर्ट यहाँ दिखेगी।</p>
+  </div>
+
+  <button class="secondary" onclick="loadReport()">
+    रिपोर्ट देखें / Refresh करें
+  </button>
 </section>
 
 <section class="card">
   <h2>🏛️ प्रमुख सरकारी योजनाएँ</h2>
   <p class="small">
-    ये प्रमुख योजनाओं की सूची है। गाँव में योजना लागू होने या लाभार्थी होने की पुष्टि सरकारी रिकॉर्ड से ही होगी।
+    ये योजनाओं की संदर्भ सूची है। यह इस बात का प्रमाण नहीं है कि प्रत्येक योजना का लाभ इस गाँव में मिला है।
   </p>
   <div id="schemeDirectory">योजना सूची लोड हो रही है...</div>
 </section>
 
 <section class="card">
-  <h2>📊 आपके गाँव की खोज रिपोर्ट</h2>
+  <h2>🔎 सरकारी वेबसाइटों पर जानकारी</h2>
   <div id="results">
-    <p class="small">स्थान भरकर खोजें।</p>
+    <p class="small">पहले अपना क्षेत्र चुनें और खोजें।</p>
   </div>
 </section>
 
 <section class="card">
-  <h2>🔍 LGD स्थान खोज</h2>
-  <p class="small">
-    स्थान का नाम या कोड खोजें। यह स्वतंत्र LGD डेटा मिरर है, आधिकारिक सरकारी पोर्टल नहीं।
-  </p>
-  <input id="placeSearch" placeholder="स्थान का नाम लिखें">
-  <button onclick="searchPlace()">स्थान खोजें</button>
-  <div id="placeResults"></div>
+  <h2>🏢 सरकारी पोर्टल</h2>
+
+  <div class="result">
+    <h3>मेरी पंचायत</h3>
+    <a href="https://meripanchayat.gov.in/" target="_blank" rel="noopener">पोर्टल खोलें</a>
+  </div>
+
+  <div class="result">
+    <h3>eGramSwaraj</h3>
+    <a href="https://egramswaraj.gov.in/" target="_blank" rel="noopener">पोर्टल खोलें</a>
+  </div>
+
+  <div class="result">
+    <h3>आधिकारिक LGD</h3>
+    <a href="https://lgdirectory.gov.in/" target="_blank" rel="noopener">गाँव और पंचायत कोड देखें</a>
+  </div>
+
+  <div class="result">
+    <h3>प्रधानमंत्री आवास योजना ग्रामीण</h3>
+    <a href="https://pmayg.nic.in/" target="_blank" rel="noopener">पोर्टल खोलें</a>
+  </div>
+
+  <div class="result">
+    <h3>मनरेगा</h3>
+    <a href="https://nrega.nic.in/" target="_blank" rel="noopener">पोर्टल खोलें</a>
+  </div>
+
+  <div class="result">
+    <h3>पेंशन योजना</h3>
+    <a href="https://nsap.nic.in/" target="_blank" rel="noopener">पोर्टल खोलें</a>
+  </div>
+
+  <div class="result">
+    <h3>किसान सम्मान निधि</h3>
+    <a href="https://pmkisan.gov.in/" target="_blank" rel="noopener">पोर्टल खोलें</a>
+  </div>
 </section>
 
 <section class="card">
-  <h2>ℹ️ डेटा के बारे में</h2>
+  <h2>ℹ️ डेटा की सच्चाई</h2>
+  <div class="warning">
+    गाँव का डेटा, ग्राम पंचायत का डेटा और ब्लॉक का डेटा अलग-अलग है।
+    ऐप किसी ब्लॉक या ग्राम पंचायत के आँकड़े को गाँव का आँकड़ा बताकर नहीं दिखाएगा।
+  </div>
   <p class="small">
-    योजना की सूची और इंटरनेट पर मिले पन्ने वास्तविक लाभार्थी गणना नहीं हैं।
-    गाँव, ग्राम पंचायत और ब्लॉक के आँकड़े अलग-अलग होते हैं।
-    ऐप किसी ब्लॉक या ग्राम पंचायत की संख्या को गाँव की संख्या बताकर नहीं दिखाता।
-  </p>
-  <p class="small">
-    <a href="https://lgdirectory.gov.in/" target="_blank">आधिकारिक LGD पोर्टल</a><br>
-    <a href="https://egramswaraj.gov.in/" target="_blank">eGramSwaraj</a><br>
-    <a href="https://meripanchayat.gov.in/" target="_blank">मेरी पंचायत</a><br>
-    <a href="https://pmayg.nic.in/" target="_blank">प्रधानमंत्री आवास योजना</a><br>
-    <a href="https://nsap.nic.in/" target="_blank">पेंशन योजना पोर्टल</a>
+    लाभार्थियों की संख्या तभी प्रमाणित मानी जाएगी जब सरकारी स्रोत में उसी गाँव की पहचान और रिकॉर्ड उपलब्ध हो।
+    इंटरनेट सर्च के परिणाम प्रमाणित लाभार्थी संख्या नहीं हैं।
   </p>
 </section>
 
 </main>
 
 <footer>
-भारत योजना खोजक | सरकारी स्रोतों से जानकारी की पुष्टि करें
+  भारत योजना खोजक<br>
+  ग्राम पंचायत पंडुवा-भिलोर | प्रयागराज, उत्तर प्रदेश
 </footer>
 
 <script>
 const $ = id => document.getElementById(id);
 
 async function api(url) {
-  const r = await fetch(url);
-  const d = await r.json();
+  const response = await fetch(url);
+  const data = await response.json();
 
-  if (!r.ok || d.success === false) {
-    throw new Error(d.error?.message || d.error || "डेटा लोड नहीं हुआ");
+  if (!response.ok || data.ok === false || data.success === false) {
+    throw new Error(data.error || "डेटा लोड नहीं हुआ");
   }
-  return d;
+
+  return data;
 }
 
-function fillSelect(id, rows, firstText) {
-  const el = $(id);
-  el.innerHTML = "";
-
-  const first = document.createElement("option");
-  first.value = "";
-  first.textContent = firstText;
-  el.appendChild(first);
-
-  (rows || []).forEach(item => {
-    const op = document.createElement("option");
-    op.value = item.code;
-    op.textContent = item.name;
-    op.dataset.name = item.name;
-    el.appendChild(op);
-  });
-
-  el.disabled = false;
+function selectedVillage() {
+  return $("village").value;
 }
 
-function resetSelect(id, text) {
-  $(id).innerHTML = "";
-  const op = document.createElement("option");
-  op.value = "";
-  op.textContent = text;
-  $(id).appendChild(op);
-  $(id).disabled = true;
+function villageName(id) {
+  if (id === "panduwa") return "पंडुवा (Panduwa)";
+  if (id === "bhilore") return "भिलोर (Bhilore)";
+  if (id === "panchayat") return "पूरी ग्राम पंचायत — पंडुवा और भिलोर";
+  return "";
 }
 
-function selectedName(id) {
-  return $(id).selectedOptions[0]?.dataset.name || "";
-}
-
-// योजनाओं की सूची
+// योजनाओं की सूची लोड करें
 async function loadSchemeDirectory() {
   try {
-    const d = await api("/api/schemes");
+    const data = await api("/api/schemes");
     const host = $("schemeDirectory");
     host.innerHTML = "";
 
-    d.schemes.forEach(s => {
+    data.schemes.forEach(scheme => {
       const box = document.createElement("div");
       box.className = "result";
 
       const tag = document.createElement("div");
       tag.className = "tag";
-      tag.textContent = s.category;
+      tag.textContent = scheme.category;
 
       const title = document.createElement("h3");
-      title.textContent = s.name;
-
-      const info = document.createElement("p");
-      info.textContent = s.level;
+      title.textContent = scheme.name;
 
       const link = document.createElement("a");
-      link.href = s.url;
+      link.href = scheme.url;
       link.target = "_blank";
       link.rel = "noopener";
       link.textContent = "आधिकारिक वेबसाइट खोलें";
 
-      box.append(tag, title, info, link);
+      box.append(tag, title, link);
       host.appendChild(box);
     });
-  } catch(e) {
+  } catch (error) {
     $("schemeDirectory").textContent =
-      "योजना सूची नहीं खुली: " + e.message;
+      "योजना सूची लोड नहीं हुई: " + error.message;
   }
 }
 
-// राज्य लोड
-async function loadStates() {
-  try {
-    const d = await api("/api/locations/states");
-    fillSelect("state", d.data, "राज्य चुनें");
+// गाँव या पंचायत की रिपोर्ट
+async function loadReport() {
+  const id = selectedVillage();
 
-    $("message").textContent =
-      "राज्य लोड हुए: " + d.data.length +
-      " | डेटा तारीख: " + (d.meta?.source_date || "उपलब्ध नहीं");
-  } catch(e) {
-    $("message").textContent = "राज्य सूची में समस्या: " + e.message;
-  }
-}
-
-// जिला लोड
-$("state").addEventListener("change", async () => {
-  resetSelect("district", "जिला चुनें");
-  resetSelect("tehsil", "पहले जिला चुनें");
-  resetSelect("block", "पहले जिला चुनें");
-
-  if (!$("state").value) return;
-
-  try {
-    $("message").textContent = "जिले लोड हो रहे हैं...";
-
-    const d = await api(
-      "/api/locations/districts?state=" +
-      encodeURIComponent($("state").value)
-    );
-
-    fillSelect("district", d.data, "जिला चुनें");
-    $("message").textContent = "जिले लोड हो गए।";
-  } catch(e) {
-    $("message").textContent = "जिला सूची में समस्या: " + e.message;
-  }
-});
-
-// तहसील और ब्लॉक लोड
-$("district").addEventListener("change", async () => {
-  resetSelect("tehsil", "तहसील चुनें");
-  resetSelect("block", "ब्लॉक चुनें");
-
-  if (!$("district").value) return;
-
-  try {
-    $("message").textContent = "तहसील और ब्लॉक लोड हो रहे हैं...";
-
-    const code = encodeURIComponent($("district").value);
-
-    const [t, b] = await Promise.all([
-      api("/api/locations/tehsils?district=" + code),
-      api("/api/locations/blocks?district=" + code)
-    ]);
-
-    fillSelect("tehsil", t.data, "तहसील चुनें");
-    fillSelect("block", b.data, "ब्लॉक चुनें");
-
-    $("message").textContent =
-      "तहसील: " + t.data.length +
-      " | ब्लॉक: " + b.data.length;
-  } catch(e) {
-    $("message").textContent = "सूची में समस्या: " + e.message;
-  }
-});
-
-// LGD स्थान खोज
-async function searchPlace() {
-  const q = $("placeSearch").value.trim();
-
-  if (!q) {
-    alert("स्थान का नाम लिखें।");
+  if (!id) {
+    $("report").textContent = "पहले अपना गाँव चुनें।";
     return;
   }
 
-  $("placeResults").textContent = "खोज जारी है...";
+  $("report").textContent = "रिपोर्ट लोड हो रही है...";
 
   try {
-    const d = await api(
-      "/api/locations/search?q=" + encodeURIComponent(q)
-    );
+    let data;
 
-    const groups = d.data?.results || {};
-    const host = $("placeResults");
+    if (id === "panchayat") {
+      data = await api("/api/panchayat-report");
+    } else {
+      data = await api("/api/village-report/" + encodeURIComponent(id));
+    }
+
+    const host = $("report");
     host.innerHTML = "";
 
-    for (const [level, rows] of Object.entries(groups)) {
-      rows.forEach(x => {
-        const box = document.createElement("div");
-        box.className = "result";
+    const title = document.createElement("h3");
+    title.textContent = id === "panchayat"
+      ? "पूरी ग्राम पंचायत की रिपोर्ट"
+      : villageName(id) + " की रिपोर्ट";
 
-        const p = document.createElement("p");
-        p.textContent =
-          level + ": " + x.name + " | LGD Code: " + x.code;
+    const level = document.createElement("div");
+    level.className = "tag";
+    level.textContent =
+      id === "panchayat" ? "ग्राम पंचायत स्तर" : "गाँव स्तर";
 
-        box.appendChild(p);
-        host.appendChild(box);
-      });
+    const message = document.createElement("div");
+    message.className = "warning";
+    message.textContent = data.message;
+
+    const count = document.createElement("div");
+    count.className = "stat";
+    count.innerHTML =
+      "<strong>प्रमाणित लाभार्थी संख्या:</strong> उपलब्ध नहीं";
+
+    host.append(title, level, message, count);
+
+    if (data.villages) {
+      const list = document.createElement("p");
+      list.className = "small";
+      list.textContent = "इस पंचायत में शामिल गाँव: " +
+        data.villages.join(", ");
+      host.appendChild(list);
     }
 
-    if (!host.children.length) {
-      host.textContent = "कोई मिलान नहीं मिला।";
+    if (data.lgdCode) {
+      const code = document.createElement("p");
+      code.className = "small";
+      code.textContent = "LGD गाँव कोड: " + data.lgdCode;
+      host.appendChild(code);
     }
-  } catch(e) {
-    $("placeResults").textContent = "खोज में समस्या: " + e.message;
+
+  } catch (error) {
+    $("report").textContent = "रिपोर्ट में समस्या: " + error.message;
   }
 }
 
-// गाँव की योजनाओं की इंटरनेट खोज
+// सरकारी वेब जानकारी खोजें
 async function searchSchemes() {
-  const state = selectedName("state");
-  const district = selectedName("district");
-  const tehsil = selectedName("tehsil");
-  const block = selectedName("block");
-  const village = $("village").value.trim();
+  const id = selectedVillage();
   const keyword = $("keyword").value.trim();
 
-  if (!state || !district || !village) {
-    alert("राज्य, जिला और गाँव का नाम जरूर भरें।");
+  if (!id) {
+    alert("पहले गाँव या ग्राम पंचायत चुनें।");
     return;
   }
 
   $("searchBtn").disabled = true;
-  $("results").textContent = "जानकारी खोजी जा रही है...";
-  $("message").textContent = "कृपया प्रतीक्षा करें...";
+  $("message").textContent = "जानकारी खोजी जा रही है...";
+  $("results").textContent = "कृपया प्रतीक्षा करें...";
 
   try {
-    const r = await fetch("/api/search", {
+    if (id === "panchayat") {
+      $("results").textContent =
+        "ग्राम पंचायत के संयुक्त परिणाम के लिए अलग सरकारी खोज उपलब्ध होने पर ही आँकड़े दिखेंगे। अभी पंचायत की प्रमाणित रिपोर्ट देखें।";
+      $("message").textContent = "पंचायत रिपोर्ट तैयार है।";
+      await loadReport();
+      return;
+    }
+
+    const response = await fetch("/api/search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        state, district, tehsil, block, village, keyword
+        villageId: id,
+        keyword: keyword
       })
     });
 
-    const d = await r.json();
+    const data = await response.json();
 
-    if (!r.ok) {
-      throw new Error(d.error || "खोज असफल हुई");
+    if (!response.ok || data.ok === false) {
+      throw new Error(data.error || "खोज असफल हुई");
     }
 
     const host = $("results");
     host.innerHTML = "";
 
     const heading = document.createElement("h3");
-    heading.textContent =
-      "खोज स्थान: " + village + ", " + district + ", " + state;
+    heading.textContent = villageName(id) + " — वेब खोज परिणाम";
     host.appendChild(heading);
 
-    const warning = document.createElement("p");
-    warning.className = "small";
+    const warning = document.createElement("div");
+    warning.className = "warning";
     warning.textContent =
-      "ध्यान दें: नीचे इंटरनेट पर मिले पन्ने हैं। इनसे गाँव के कुल लाभार्थियों या योजनाओं की प्रमाणित संख्या साबित नहीं होती।";
+      "ये इंटरनेट पर मिले संदर्भ हैं। इनसे गाँव के लाभार्थियों की संख्या प्रमाणित नहीं होती।";
     host.appendChild(warning);
 
-    if (!d.results || !d.results.length) {
-      const p = document.createElement("p");
-      p.textContent =
-        "कोई वेब परिणाम नहीं मिला। इसका मतलब यह नहीं कि गाँव में योजना नहीं है।";
-      host.appendChild(p);
-    } else {
-      d.results.forEach(item => {
-        const box = document.createElement("div");
-        box.className = "result";
-
-        const title = document.createElement("h3");
-        title.textContent = item.title;
-
-        const desc = document.createElement("p");
-        desc.textContent = item.text || "विवरण उपलब्ध नहीं है।";
-
-        box.append(title, desc);
-
-        if (item.date) {
-          const date = document.createElement("p");
-          date.className = "small";
-          date.textContent = "तारीख: " + item.date;
-          box.appendChild(date);
-        }
-
-        if (item.url) {
-          const link = document.createElement("a");
-          link.href = item.url;
-          link.target = "_blank";
-          link.rel = "noopener";
-          link.textContent = "मूल वेबसाइट खोलें";
-          box.appendChild(link);
-        }
-
-        host.appendChild(box);
-      });
+    if (!data.results || data.results.length === 0) {
+      const empty = document.createElement("p");
+      empty.textContent = "कोई वेब परिणाम नहीं मिला। इसका मतलब यह नहीं कि गाँव में योजना नहीं है।";
+      host.appendChild(empty);
     }
 
-    $("message").textContent =
-      "खोज पूरी हुई। सरकारी पोर्टल से जानकारी की पुष्टि करें।";
+    (data.results || []).forEach(item => {
+      const box = document.createElement("div");
+      box.className = "result";
 
-  } catch(e) {
-    $("results").textContent = "खोज में समस्या: " + e.message;
+      const title = document.createElement("h3");
+      title.textContent = item.title;
+
+      const desc = document.createElement("p");
+      desc.textContent = item.text || "विवरण उपलब्ध नहीं है।";
+
+      box.append(title, desc);
+
+      if (item.url) {
+        const link = document.createElement("a");
+        link.href = item.url;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = "मूल वेबसाइट खोलें";
+        box.appendChild(link);
+      }
+
+      host.appendChild(box);
+    });
+
+    $("message").textContent =
+      "खोज पूरी हुई। सरकारी स्रोत से परिणाम की पुष्टि करें।";
+
+    await loadReport();
+
+  } catch (error) {
+    $("results").textContent = "खोज में समस्या: " + error.message;
     $("message").textContent = "खोज पूरी नहीं हो सकी।";
   } finally {
     $("searchBtn").disabled = false;
   }
 }
 
+$("village").addEventListener("change", () => {
+  $("results").innerHTML =
+    '<p class="small">खोज करने के लिए बटन दबाएँ।</p>';
+  loadReport();
+});
+
 loadSchemeDirectory();
-loadStates();
 </script>
+
 </body>
 </html>
